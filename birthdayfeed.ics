@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//birthdayfeed.subtlecoolness.com
+CALSCALE:GREGoRIAN
+X-WR-CALNAME:birthdayfeed
+X-WR-TIMEZONE:UTC
+X-WR-CALDESC:Birthday calendar provided by 
+ http://birthdayfeed.subtlecoolness.com/
+{% for bf_birthday in bf_birthdays %}BEGIN:VEVENT
+DTSTART;VALUE=DATE:{{ bf_birthday.bf_dtstart }}
+DTEND;VALUE=DATE:{{ bf_birthday.bf_dtend }}
+DTSTAMP:{{ bf_dtstamp }}
+UID:{{ bf_birthday.bf_uid }}@
+ birthdayfeed.subtlecoolness.com
+CREATED:{{ bf_dtstamp }}
+DESCRIPTION:{{ bf_birthday.bf_t }}
+LAST-MODIFIED:{{ bf_dtstamp }}
+SUMMARY:{{ bf_birthday.bf_s }}
+TRANSP:TRANSPARENT
+END:VEVENT
+{% endfor %}END:VCALENDAR
