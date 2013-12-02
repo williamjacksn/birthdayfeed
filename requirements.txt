@@ -1,5 +1,5 @@
 gunicorn==18.0
-Workzeug==0.9.4
+Werkzeug==0.9.4
 markupsafe==0.18
 Jinja2==2.7.1
 itsdangerous==0.23
