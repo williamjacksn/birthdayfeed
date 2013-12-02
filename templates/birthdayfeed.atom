@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title>birthdayfeed</title>
+    <subtitle>Birthdays in a feed reader: think of the possibilities!</subtitle>
+    <link rel="self" href="{{ link_self }}" />
+    <link href="{{ home }}" />
+    <updated>{{ today_atom }}</updated>
+    <id>{{ home }}</id>
+
+    <author>
+        <name>{{ author }}</name>
+    </author>
+    <icon>{{ icon_url }}</icon>
+    <logo>{{ logo_url }}</logo>
+
+    {% for birthday in birthdays %}
+        <entry>
+            <title>{{ birthday.title }}</title>
+            <link href="{{ escaped_location }}" />
+            <updated>{{ birthday.updated }}</updated>
+            <id>{{ birthday.id }}</id>
+            <summary>
+                {{ birthday.title }}
+            </summary>
+            <content>
+                {{ birthday.title }}
+            </content>
+        </entry>
+    {% endfor %}
+
+</feed>
