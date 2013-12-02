@@ -2,12 +2,19 @@ import calendar
 import cgi
 import csv
 import datetime
+import os
 import requests
 
-from flask import Flask, make_response, redirect, render_template, request, url_for
+from flask import (Flask, make_response, redirect, render_template, request,
+    send_from_directory, url_for)
 
 app = Flask(__name__)
 app.debug = True
+
+@app.route(u'/favicon.ico')
+def favicon():
+    static_path = os.path.join(app.root_path, u'static')
+    return send_from_directory(static_path, u'birthdayfeed.png')
 
 @app.route(u'/')
 def index():
@@ -61,11 +68,11 @@ def atom():
     today = datetime.date.today()
     template_vars[u'today_atom'] = u'{}T00:00:00Z'.format(today.isoformat())
 
-    icon_url = url_for(u'static', filename=u'birthdayfeed.png', _external=True)
-    template_vars[u'icon_url'] = icon_url
+    icon = url_for(u'static', filename=u'birthdayfeed.png', _external=True)
+    template_vars[u'icon_url'] = icon
 
-    logo_url = url_for(u'static', filename=u'birthday+feed.png', _external=True)
-    template_vars[u'logo_url'] = logo_url
+    logo = url_for(u'static', filename=u'birthday+feed.png', _external=True)
+    template_vars[u'logo_url'] = logo
 
     birthdays = list()
     seven_days = datetime.timedelta(days=7)
@@ -110,9 +117,10 @@ def atom():
             })
     template_vars[u'birthdays'] = birthdays
 
-    rsp = make_response(render_template(u'birthdayfeed.atom', **template_vars))
-    rsp.mimetype = u'application/atom+xml'
-    return rsp
+    template = render_template(u'birthdayfeed.atom', **template_vars)
+    resp = make_response(template)
+    resp.mimetype = u'application/atom+xml'
+    return resp
 
 @app.route(u'/birthdayfeed.ics')
 def ics():
@@ -168,9 +176,9 @@ def ics():
         })
     template_vars[u'birthdays'] = birthdays
 
-    rsp = make_response(render_template(u'birthdayfeed.ics', **template_vars))
-    rsp.mimetype = u'text/plain'
-    return rsp
+    resp = make_response(render_template(u'birthdayfeed.ics', **template_vars))
+    resp.mimetype = u'text/plain'
+    return resp
 
 if __name__ == u'__main__':
     app.run(host=u'0.0.0.0')
