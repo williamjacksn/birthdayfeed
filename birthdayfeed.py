@@ -103,7 +103,7 @@ def atom():
         next_birthday = get_next_birthday(birthday)
         if next_birthday - today <= seven_days:
             if year == 1:
-                bd_orig = birthday.strftime(u'%B %d')
+                bd_orig = birthday.replace(year=1900).strftime(u'%B %d')
                 bd_next = next_birthday.strftime(u'%A, %B %d, %Y')
                 title = u'{}, born {}, will celebrate a birthday on {}'
                 title = title.format(name, bd_orig, bd_next)
@@ -162,7 +162,7 @@ def ics():
         next_birthday = get_next_birthday(birthday)
         if year == 1:
             summary = u'{}\'s birthday'.format(name)
-            bd_orig = birthday.strftime(u'%B %d')
+            bd_orig = birthday.replace(year=1900).strftime(u'%B %d')
             bd_next = next_birthday.strftime(u'%A\\, %B %d\\, %Y')
             desc = u'{}\\, \r\n born {}\\, \r\n will '.format(name, bd_orig)
             desc = u'{}celebrate a birthday on \r\n {}'.format(desc, bd_next)
