@@ -20,6 +20,11 @@ def favicon():
 def index():
     return render_template(u'index.html')
 
+def row_is_valid(row):
+    if len(row) < 4:
+        return False
+    return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
+
 def date_is_valid(year, month, day):
     try:
         datetime.date(year, month, day)
@@ -80,18 +85,21 @@ def atom():
     template_vars[u'escaped_location'] = cgi.escape(data_location)
     response = requests.get(data_location)
     for row in csv.reader(response.iter_lines()):
-        if len(row) < 4:
+        if not row_is_valid(row):
             continue
+
         name = row[0]
         year = int(row[1])
         if year == 0:
             year = 1
         month = int(row[2])
         day = int(row[3])
+
         if date_is_valid(year, month, day):
             birthday = datetime.date(year, month, day)
         else:
             continue
+
         next_birthday = get_next_birthday(birthday)
         if next_birthday - today <= seven_days:
             if year == 1:
@@ -136,18 +144,21 @@ def ics():
     data_location = request.args.get(u'icsd', u'')
     response = requests.get(data_location)
     for row in csv.reader(response.iter_lines()):
-        if len(row) < 4:
+        if not row_is_valid(row):
             continue
+
         name = row[0]
         year = int(row[1])
         if year == 0:
             year = 1
         month = int(row[2])
         day = int(row[3])
+
         if date_is_valid(year, month, day):
             birthday = datetime.date(year, month, day)
         else:
             continue
+
         next_birthday = get_next_birthday(birthday)
         if year == 1:
             summary = u'{}\'s birthday'.format(name)
