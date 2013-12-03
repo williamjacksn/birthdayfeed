@@ -88,7 +88,7 @@ def atom():
         if not row_is_valid(row):
             continue
 
-        name = row[0]
+        name = row[0].decode(u'utf-8')
         year = int(row[1])
         if year == 0:
             year = 1
@@ -147,7 +147,7 @@ def ics():
         if not row_is_valid(row):
             continue
 
-        name = row[0]
+        name = row[0].decode(u'utf-8')
         year = int(row[1])
         if year == 0:
             year = 1
@@ -171,7 +171,7 @@ def ics():
             summary = u'{} turns {}'.format(name, age)
             bd_orig = birthday.strftime(u'%B %d\\, %Y')
             bd_next = next_birthday.strftime(u'%A\\, %B %d\\, %Y')
-            desc = '{}\\, \r\n born {}\\, \r\n will turn {} on \r\n {}'
+            desc = u'{}\\, \r\n born {}\\, \r\n will turn {} on \r\n {}'
             desc = desc.format(name, bd_orig, age, bd_next)
         dtstart = next_birthday.strftime(u'%Y%m%d')
         day_after = next_birthday + datetime.timedelta(days=1)
