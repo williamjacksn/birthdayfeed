@@ -1,1 +1,1 @@
-web: gunicorn birthdayfeed:app
+web: gunicorn birthdayfeed:app --workers=2
