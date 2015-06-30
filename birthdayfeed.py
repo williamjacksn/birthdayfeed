@@ -93,7 +93,6 @@ def atom():
         if not row_is_valid(row):
             continue
 
-        app.logger.debug(row)
         name = row[0]
         year = int(row[1])
         if year == 0:
