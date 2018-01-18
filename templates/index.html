@@ -11,7 +11,7 @@
     <body>
         <h1><img src="{{ url_for('static', filename='birthday+feed.png') }}" alt="(birthdayfeed icon)">birthdayfeed</h1>
         <p>Subscribe to birthdays in a feed reader or calendar</p>
-        <form action="birthdayfeed.atom" method="get">
+        <form action="{{ url_for('atom') }}" method="get">
             <p class="data-location">
                 <label for="d">data location:</label>
                 <input type="text" id="d" name="d">
@@ -19,12 +19,12 @@
                 <a href="https://feedly.uservoice.com/knowledgebase/articles/187494-how-to-add-news-feeds-to-your-feedly">How do I subscribe to a feed in Feedly?</a>
             </p>
         </form>
-        <form action="birthdayfeed.ics" method="get">
+        <form action="{{ url_for('ics') }}" method="get">
             <p class="data-location">
                 <label for="icsd">data location:</label>
-                <input type="text" id="icsd" name="icsd">
+                <input type="text" id="icsd" name="d">
                 <input type="submit" value="calendar" class="button">
-                <a href="http://www.google.com/support/calendar/bin/answer.py?answer=37100">How do I subscribe to a calendar in Google Calendar?</a>
+                <a href="https://support.google.com/calendar/answer/37100">How do I subscribe to a calendar in Google Calendar?</a>
             </p>
         </form>
         <h2>Instructions</h2>

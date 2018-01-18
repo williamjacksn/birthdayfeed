@@ -4,21 +4,21 @@
 
     <title>birthdayfeed</title>
     <subtitle>Birthdays in a feed reader: think of the possibilities!</subtitle>
-    <link rel="self" href="{{ link_self }}" />
-    <link href="{{ home }}" />
-    <updated>{{ today_atom }}</updated>
-    <id>{{ home }}</id>
+    <link rel="self" href="{{ request.url }}" />
+    <link href="{{ url_for('index', _external=True) }}" />
+    <updated>{{ c.today_atom }}</updated>
+    <id>{{ url_for('index', _external=True) }}</id>
 
     <author>
-        <name>{{ author }}</name>
+        <name>{{ request.args.get('a', 'birthdayfeed') }}</name>
     </author>
-    <icon>{{ icon_url }}</icon>
-    <logo>{{ logo_url }}</logo>
+    <icon>{{ url_for('static', filename='birthdayfeed.png', _external=True) }}</icon>
+    <logo>{{ url_for('static', filename='birthday+feed.png', _external=True) }}</logo>
 
-    {% for birthday in birthdays %}
+    {% for birthday in c.birthdays %}
         <entry>
             <title>{{ birthday.title }}</title>
-            <link href="{{ escaped_location }}" />
+            <link href="{{ c.escaped_location }}" />
             <updated>{{ birthday.updated }}</updated>
             <id>{{ birthday.id }}</id>
             <summary>

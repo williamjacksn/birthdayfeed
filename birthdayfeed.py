@@ -12,8 +12,7 @@ app = flask.Flask(__name__)
 
 @app.route('/favicon.ico')
 def favicon():
-    static_path = os.path.join(app.root_path, 'static')
-    return flask.send_from_directory(static_path, 'birthdayfeed.png')
+    return flask.send_from_directory(os.path.join(app.root_path, 'static'), 'birthdayfeed.png')
 
 
 @app.route('/')
@@ -67,27 +66,15 @@ def atom():
     if 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
 
-    template_vars = {}
-
-    home = flask.url_for('index', _external=True)
-    template_vars['home'] = home
-
-    template_vars['link_self'] = flask.request.url
-    template_vars['author'] = flask.request.args.get('a', 'birthdayfeed')
+    c = {}
 
     today = datetime.date.today()
-    template_vars['today_atom'] = '{}T00:00:00Z'.format(today.isoformat())
+    c['today_atom'] = f'{today.isoformat()}T00:00:00Z'
 
-    icon = flask.url_for('static', filename='birthdayfeed.png', _external=True)
-    template_vars['icon_url'] = icon
-
-    logo = flask.url_for('static', filename='birthday+feed.png', _external=True)
-    template_vars['logo_url'] = logo
-
-    birthdays = []
+    c['birthdays'] = []
     seven_days = datetime.timedelta(days=7)
     data_location = flask.request.args.get('d', '')
-    template_vars['escaped_location'] = html.escape(data_location)
+    c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
         if not row_is_valid(row):
@@ -106,35 +93,29 @@ def atom():
             continue
 
         next_birthday = get_next_birthday(birthday)
+        bd_next = next_birthday.strftime('%A, %B %d, %Y')
         if next_birthday - today <= seven_days:
             if year == 1:
                 bd_orig = birthday.replace(year=1900).strftime('%B %d')
-                bd_next = next_birthday.strftime('%A, %B %d, %Y')
-                title = '{}, born {}, will celebrate a birthday on {}'
-                title = title.format(name, bd_orig, bd_next)
+                title = f'{name}, born {bd_orig}, will celebrate a birthday on {bd_next}'
             else:
                 age = next_birthday.year - birthday.year
                 bd_orig = birthday.strftime('%B %d, %Y')
-                bd_next = next_birthday.strftime('%A, %B %d, %Y')
-                title = '{}, born {}, will turn {} on {}'
-                title = title.format(name, bd_orig, age, bd_next)
+                title = f'{name}, born {bd_orig}, will turn {age} on {bd_next}'
             update_date = next_birthday - seven_days
-            update_string = '{}T00:00:00Z'.format(update_date.isoformat())
+            update_string = f'{update_date.isoformat()}T00:00:00Z'
             id_name = name.replace(' ', '-')
-            id_s = '{}{}/{}'.format(home, id_name, next_birthday.year)
-            birthdays.append({'title': title, 'updated': update_string,
-                              'id': id_s})
-    template_vars['birthdays'] = birthdays
+            id_s = '{}{}/{}'.format(flask.url_for('index', _external=True), id_name, next_birthday.year)
+            c['birthdays'].append({'title': title, 'updated': update_string, 'id': id_s})
 
-    template = flask.render_template('birthdayfeed.atom', **template_vars)
-    resp = flask.make_response(template)
+    resp = flask.make_response(flask.render_template('birthdayfeed.atom', c=c))
     resp.mimetype = 'application/atom+xml'
     return resp
 
 
 @app.route('/birthdayfeed.ics')
 def ics():
-    if 'icsd' not in flask.request.args:
+    if 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
 
     cal = icalendar.Calendar()
@@ -143,13 +124,12 @@ def ics():
     cal.add('calscale', 'GREGORIAN')
     cal.add('x-wr-calname', 'birthdayfeed')
     cal.add('x-wr-timezone', 'UTC')
-    cal.add('x-wr-caldesc', ('Birthday calendar provided by '
-                             'http://birthdayfeed.subtlecoolness.com/'))
+    cal.add('x-wr-caldesc', 'Birthday calendar provided by http://birthdayfeed.subtlecoolness.com/')
 
     today = datetime.date.today()
     dtstamp = datetime.datetime.combine(today, datetime.time())
 
-    data_location = flask.request.args.get('icsd', '')
+    data_location = flask.request.args.get('d', '')
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
         if not row_is_valid(row):
@@ -170,21 +150,19 @@ def ics():
         event = icalendar.Event()
         next_birthday = get_next_birthday(birthday)
         if year == 1:
-            summary = '{}\'s birthday'.format(name)
+            summary = f'{name}\'s birthday'
             bd_orig = birthday.replace(year=1900).strftime('%B %d')
             bd_next = next_birthday.strftime('%A, %B %d, %Y')
-            desc = '{}, born {}, will celebrate a birthday on {}'
-            desc = desc.format(name, bd_orig, bd_next)
+            desc = f'{name}, born {bd_orig}, will celebrate a birthday on {bd_next}'
         else:
             age = next_birthday.year - birthday.year
-            summary = '{} turns {}'.format(name, age)
+            summary = f'{name} turns {age}'
             bd_orig = birthday.strftime('%B %d, %Y')
             bd_next = next_birthday.strftime('%A, %B %d, %Y')
-            desc = '{}, born {}, will turn {} on {}'
-            desc = desc.format(name, bd_orig, age, bd_next)
+            desc = f'{name}, born {bd_orig}, will turn {age} on {bd_next}'
         day_after = next_birthday + datetime.timedelta(days=1)
         uid_name = name.replace(' ', '')
-        uid = '{}{}'.format(uid_name, next_birthday.year)
+        uid = f'{uid_name}{next_birthday.year}'
         event.add('summary', summary)
         event.add('dtstart', next_birthday)
         event.add('dtend', day_after)
@@ -204,5 +182,6 @@ def ics():
 def main():
     app.run(host='0.0.0.0', debug=True)
 
-if __name__ == u'__main__':
+
+if __name__ == '__main__':
     main()
