@@ -131,7 +131,7 @@ def atom():
 
 @app.route('/birthdayfeed.ics')
 def ics():
-    if 'd' not in flask.request.args:
+    if 'icsd' not in flask.request.args and 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
 
     cal = icalendar.Calendar()
@@ -145,7 +145,7 @@ def ics():
     today = datetime.date.today()
     dtstamp = datetime.datetime.combine(today, datetime.time())
 
-    data_location = flask.request.args.get('d')
+    data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
         if not row_is_valid(row):
