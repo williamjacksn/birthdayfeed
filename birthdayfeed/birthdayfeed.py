@@ -4,10 +4,22 @@ import datetime
 import flask
 import html
 import icalendar
+import logging
 import os
 import requests
+import sys
+import waitress
+
+log = logging.getLogger(__name__)
 
 app = flask.Flask(__name__)
+
+DEFAULTS = {
+    'LOGLEVEL': 'DEBUG'
+}
+
+for key in ['LOGLEVEL', 'UNIX_SOCKET']:
+    app.config[key] = os.environ.get(key, DEFAULTS.get(key))
 
 
 @app.route('/favicon.ico')
@@ -65,6 +77,9 @@ def get_next_birthday(bd):
 def atom():
     if 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
+    notification_days = 7
+    if 'notification_days' in flask.request.args:
+        notification_days = int(flask.request.args['notification_days'])
 
     c = {}
 
@@ -72,8 +87,8 @@ def atom():
     c['today_atom'] = f'{today.isoformat()}T00:00:00Z'
 
     c['birthdays'] = []
-    seven_days = datetime.timedelta(days=7)
-    data_location = flask.request.args.get('d', '')
+    notification_interval = datetime.timedelta(days=notification_days)
+    data_location = flask.request.args.get('d')
     c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
@@ -94,7 +109,7 @@ def atom():
 
         next_birthday = get_next_birthday(birthday)
         bd_next = next_birthday.strftime('%A, %B %d, %Y')
-        if next_birthday - today <= seven_days:
+        if next_birthday - today <= notification_interval:
             if year == 1:
                 bd_orig = birthday.replace(year=1900).strftime('%B %d')
                 title = f'{name}, born {bd_orig}, will celebrate a birthday on {bd_next}'
@@ -102,10 +117,11 @@ def atom():
                 age = next_birthday.year - birthday.year
                 bd_orig = birthday.strftime('%B %d, %Y')
                 title = f'{name}, born {bd_orig}, will turn {age} on {bd_next}'
-            update_date = next_birthday - seven_days
+            update_date = next_birthday - notification_interval
             update_string = f'{update_date.isoformat()}T00:00:00Z'
             id_name = name.replace(' ', '-')
-            id_s = '{}{}/{}'.format(flask.url_for('index', _external=True), id_name, next_birthday.year)
+            url = flask.url_for('index', _external=True)
+            id_s = f'{url}{id_name}/{next_birthday.year}'
             c['birthdays'].append({'title': title, 'updated': update_string, 'id': id_s})
 
     resp = flask.make_response(flask.render_template('birthdayfeed.atom', c=c))
@@ -124,12 +140,12 @@ def ics():
     cal.add('calscale', 'GREGORIAN')
     cal.add('x-wr-calname', 'birthdayfeed')
     cal.add('x-wr-timezone', 'UTC')
-    cal.add('x-wr-caldesc', 'Birthday calendar provided by http://birthdayfeed.subtlecoolness.com/')
+    cal.add('x-wr-caldesc', 'Birthday calendar provided by https://birthdayfeed.subtlecoolness.com/')
 
     today = datetime.date.today()
     dtstamp = datetime.datetime.combine(today, datetime.time())
 
-    data_location = flask.request.args.get('d', '')
+    data_location = flask.request.args.get('d')
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
         if not row_is_valid(row):
@@ -150,7 +166,7 @@ def ics():
         event = icalendar.Event()
         next_birthday = get_next_birthday(birthday)
         if year == 1:
-            summary = f'{name}\'s birthday'
+            summary = f"{name}'s birthday"
             bd_orig = birthday.replace(year=1900).strftime('%B %d')
             bd_next = next_birthday.strftime('%A, %B %d, %Y')
             desc = f'{name}, born {bd_orig}, will celebrate a birthday on {bd_next}'
@@ -180,8 +196,8 @@ def ics():
 
 
 def main():
-    app.run(host='0.0.0.0', debug=True)
-
-
-if __name__ == '__main__':
-    main()
+    logging.basicConfig(stream=sys.stdout, level=app.config['LOGLEVEL'])
+    if app.config['UNIX_SOCKET']:
+        waitress.serve(app, unix_socket=app.config['UNIX_SOCKET'], unix_socket_perms='666')
+    else:
+        waitress.serve(app)
