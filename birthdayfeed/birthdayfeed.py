@@ -15,10 +15,11 @@ log = logging.getLogger(__name__)
 app = flask.Flask(__name__)
 
 DEFAULTS = {
-    'LOGLEVEL': 'DEBUG'
+    'LOG_FORMAT': '%(levelname)s [%(name)s] %(message)s',
+    'LOG_LEVEL': 'DEBUG'
 }
 
-for key in ['LOGLEVEL', 'UNIX_SOCKET']:
+for key in ['LOG_FORMAT', 'LOG_LEVEL', 'UNIX_SOCKET']:
     app.config[key] = os.environ.get(key, DEFAULTS.get(key))
 
 
@@ -196,7 +197,7 @@ def ics():
 
 
 def main():
-    logging.basicConfig(stream=sys.stdout, level=app.config['LOGLEVEL'])
+    logging.basicConfig(format=app.config['LOG_FORMAT'], level=app.config['LOG_LEVEL'], stream=sys.stdout)
     if app.config['UNIX_SOCKET']:
         waitress.serve(app, unix_socket=app.config['UNIX_SOCKET'], unix_socket_perms='666')
     else:

@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='birthdayfeed',
-    version='1.0.0',
+    version='1.0.2',
     description='Subscribe to birthdays in a feed reader or a calendar',
     url='https://github.com/williamjacksn/birthdayfeed',
     author='William Jackson',
