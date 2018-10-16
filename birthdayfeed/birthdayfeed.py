@@ -189,5 +189,8 @@ def ics():
 
 
 def main():
-    logging.basicConfig(format=config.log_format, level=config.log_level, stream=sys.stdout)
+    logging.basicConfig(format=config.log_format, level='DEBUG', stream=sys.stdout)
+    app.logger.debug(f'birthdayfeed {config.version}')
+    app.logger.debug(f'Changing log level to {config.log_level}')
+    logging.getLogger().setLevel(config.log_level)
     waitress.serve(app)

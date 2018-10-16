@@ -1,0 +1,7 @@
+Flask==1.0.2
+icalendar==4.0.3
+pip==18.1
+requests==2.19.1
+setuptools==40.4.3
+wheel==0.32.1
+waitress==1.1.0

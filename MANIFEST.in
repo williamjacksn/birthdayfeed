@@ -1,2 +1,0 @@
-recursive-include birthdayfeed/static *
-recursive-include birthdayfeed/templates *
