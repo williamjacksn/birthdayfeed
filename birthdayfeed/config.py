@@ -8,7 +8,7 @@ class Config:
 
     def __init__(self):
         self.log_format = os.getenv('LOG_FORMAT', '%(levelname)s [%(name)s] %(message)s')
-        self.log_level = os.getenv('LOG_LEVEL', 'DEBUG')
+        self.log_level = os.getenv('LOG_LEVEL', 'INFO')
 
     @property
     def version(self) -> str:
