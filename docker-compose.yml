@@ -4,3 +4,5 @@ services:
   birthdayfeed:
     build: .
     image: williamjackson/birthdayfeed
+    ports:
+      - 8080:8080
