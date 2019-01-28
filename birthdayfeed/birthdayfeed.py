@@ -101,15 +101,13 @@ def atom():
             continue
 
         next_birthday = get_next_birthday(birthday)
-        bd_next = next_birthday.strftime('%A, %B %d, %Y')
+        bd_next = f'{next_birthday:%A, %B} {next_birthday.day}, {next_birthday.year}'
         if next_birthday - today <= notification_interval:
             if year == 1:
-                bd_orig = birthday.replace(year=1900).strftime('%B %d')
-                title = f'{name}, born {bd_orig}, will celebrate a birthday on {bd_next}'
+                title = f'{name}, born {birthday:%B} {birthday.day}, will celebrate a birthday on {bd_next}'
             else:
                 age = next_birthday.year - birthday.year
-                bd_orig = birthday.strftime('%B %d, %Y')
-                title = f'{name}, born {bd_orig}, will turn {age} on {bd_next}'
+                title = f'{name}, born {birthday:%B} {birthday.day}, {birthday.year}, will turn {age} on {bd_next}'
             update_date = next_birthday - notification_interval
             update_string = f'{update_date.isoformat()}T00:00:00Z'
             id_name = name.replace(' ', '-')
@@ -158,17 +156,14 @@ def ics():
 
         event = icalendar.Event()
         next_birthday = get_next_birthday(birthday)
+        bd_next = f'{next_birthday:%A, %B} {next_birthday.day}, {next_birthday.year}'
         if year == 1:
             summary = f"{name}'s birthday"
-            bd_orig = birthday.replace(year=1900).strftime('%B %d')
-            bd_next = next_birthday.strftime('%A, %B %d, %Y')
-            desc = f'{name}, born {bd_orig}, will celebrate a birthday on {bd_next}'
+            desc = f'{name}, born {birthday:%B} {birthday.day}, will celebrate a birthday on {bd_next}'
         else:
             age = next_birthday.year - birthday.year
             summary = f'{name} turns {age}'
-            bd_orig = birthday.strftime('%B %d, %Y')
-            bd_next = next_birthday.strftime('%A, %B %d, %Y')
-            desc = f'{name}, born {bd_orig}, will turn {age} on {bd_next}'
+            desc = f'{name}, born {birthday:%B} {birthday.day}, {birthday.year}, will turn {age} on {bd_next}'
         day_after = next_birthday + datetime.timedelta(days=1)
         uid_name = name.replace(' ', '')
         uid = f'{uid_name}{next_birthday.year}'
