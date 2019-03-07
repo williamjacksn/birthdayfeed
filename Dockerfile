@@ -15,4 +15,4 @@ ENV PYTHONUNBUFFERED 1
 
 LABEL maintainer=william@subtlecoolness.com \
       org.label-schema.schema-version=1.0 \
-      org.label-schema.version=1.0.11
+      org.label-schema.version=1.0.12
