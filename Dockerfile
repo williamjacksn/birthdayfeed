@@ -13,6 +13,6 @@ HEALTHCHECK CMD ["wget", "--spider", "--quiet", "http://localhost:8080/"]
 
 ENV PYTHONUNBUFFERED 1
 
-LABEL maintainer=william@subtlecoolness.com \
-      org.label-schema.schema-version=1.0 \
-      org.label-schema.version=1.0.12
+LABEL org.opencontainers.image.authors="William Jackson <william@subtlecoolness.com>" \
+      org.opencontainers.image.source="https://github.com/williamjacksn/birthdayfeed" \
+      org.opencontainers.image.version=1.0.12
