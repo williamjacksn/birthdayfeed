@@ -15,4 +15,4 @@ ENV PYTHONUNBUFFERED 1
 
 LABEL org.opencontainers.image.authors="William Jackson <william@subtlecoolness.com>" \
       org.opencontainers.image.source="https://github.com/williamjacksn/birthdayfeed" \
-      org.opencontainers.image.version=1.0.13
+      org.opencontainers.image.version=1.0.14
