@@ -88,7 +88,7 @@ def atom():
         if not row_is_valid(row):
             continue
 
-        name = row[0]
+        name = html.escape(row[0])
         year = int(row[1])
         if year == 0:
             year = 1
