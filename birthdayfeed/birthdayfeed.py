@@ -179,7 +179,7 @@ def ics():
         cal.add_component(event)
 
     resp = flask.make_response(cal.to_ical())
-    resp.mimetype = 'text/plain'
+    resp.mimetype = 'text/calendar'
     return resp
 
 
