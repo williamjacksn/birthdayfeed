@@ -10,9 +10,11 @@ import os
 import requests
 import sys
 import waitress
+import werkzeug.middleware.proxy_fix
 
 config = birthdayfeed.config.Config()
 app = flask.Flask(__name__)
+app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
 
 
 @app.route('/favicon.ico')
@@ -20,7 +22,7 @@ def favicon():
     return flask.send_from_directory(os.path.join(app.root_path, 'static'), 'birthdayfeed.png')
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     return flask.render_template('index.html')
 
