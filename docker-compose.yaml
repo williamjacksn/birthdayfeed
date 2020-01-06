@@ -3,6 +3,6 @@ version: '3'
 services:
   birthdayfeed:
     build: .
-    image: williamjackson/birthdayfeed
+    image: docker.pkg.github.com/williamjacksn/birthdayfeed/birthdayfeed
     ports:
       - 8080:8080
