@@ -12,6 +12,8 @@ import sys
 import waitress
 import werkzeug.middleware.proxy_fix
 
+from typing import List
+
 config = birthdayfeed.config.Config()
 app = flask.Flask(__name__)
 app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
@@ -45,10 +47,34 @@ def is_leap_day(d):
     return d.month == 2 and d.day == 29
 
 
+def get_all_birthdays(bd: datetime.date) -> List[datetime.date]:
+    """Given a datetime.date object representing a date of birth, return a list of datetime.date objects representing
+    all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever is
+    greater."""
+
+    if bd.year == 1:
+        return [get_next_birthday(bd)]
+
+    birthdays = [bd]
+    today = datetime.date.today()
+    next_year = today.year + 1
+
+    offset = 0
+    this_bd = bd
+    while this_bd.year < next_year or offset < 85:
+        offset = offset + 1
+        try:
+            this_bd = bd.replace(year=bd.year + offset)
+        except ValueError:
+            this_bd = datetime.date(bd.year + offset, 3, 1)
+        birthdays.append(this_bd)
+
+    return birthdays
+
+
 def get_next_birthday(bd):
-    """Given a datetime.date object representing a date of birth, return a
-    datetime.date object representing the next time this birthday will be
-    celebrated."""
+    """Given a datetime.date object representing a date of birth, return a datetime.date object representing the next
+    time this birthday will be celebrated."""
 
     today = datetime.date.today()
     this_year = today.year
@@ -156,29 +182,33 @@ def ics():
         else:
             continue
 
-        event = icalendar.Event()
-        next_birthday = get_next_birthday(birthday)
-        bd_next = f'{next_birthday:%A, %B} {next_birthday.day}, {next_birthday.year}'
-        if year == 1:
-            summary = f"{name}'s birthday"
-            desc = f'{name}, born {birthday:%B} {birthday.day}, will celebrate a birthday on {bd_next}'
-        else:
-            age = next_birthday.year - birthday.year
-            summary = f'{name} turns {age}'
-            desc = f'{name}, born {birthday:%B} {birthday.day}, {birthday.year}, will turn {age} on {bd_next}'
-        day_after = next_birthday + datetime.timedelta(days=1)
-        uid_name = name.replace(' ', '')
-        uid = f'{uid_name}{next_birthday.year}'
-        event.add('summary', summary)
-        event.add('dtstart', next_birthday)
-        event.add('dtend', day_after)
-        event.add('dtstamp', dtstamp)
-        event.add('uid', uid + '@birthdayfeed.subtlecoolness.com')
-        event.add('created', dtstamp)
-        event.add('description', desc)
-        event.add('last-modified', dtstamp)
-        event.add('transp', 'TRANSPARENT')
-        cal.add_component(event)
+        for next_birthday in get_all_birthdays(birthday):
+            event = icalendar.Event()
+            bd_next = f'{next_birthday:%A, %B} {next_birthday.day}, {next_birthday.year}'
+            if year == 1:
+                summary = f"{name}'s birthday"
+                desc = f'{name}, born {birthday:%B} {birthday.day}, will celebrate a birthday on {bd_next}'
+            else:
+                age = next_birthday.year - birthday.year
+                if age == 0:
+                    summary = f'{name} is born'
+                    desc = f'{name} was born on {bd_next}'
+                else:
+                    summary = f'{name} turns {age}'
+                    desc = f'{name}, born {birthday:%B} {birthday.day}, {birthday.year}, will turn {age} on {bd_next}'
+            day_after = next_birthday + datetime.timedelta(days=1)
+            uid_name = name.replace(' ', '')
+            uid = f'{uid_name}{next_birthday.year}'
+            event.add('summary', summary)
+            event.add('dtstart', next_birthday)
+            event.add('dtend', day_after)
+            event.add('dtstamp', dtstamp)
+            event.add('uid', f'{uid}@birthdayfeed.subtlecoolness.com')
+            event.add('created', dtstamp)
+            event.add('description', desc)
+            event.add('last-modified', dtstamp)
+            event.add('transp', 'TRANSPARENT')
+            cal.add_component(event)
 
     resp = flask.make_response(cal.to_ical())
     resp.mimetype = 'text/calendar'
