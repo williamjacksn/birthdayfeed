@@ -1,5 +1,5 @@
 Flask==1.1.2
 Werkzeug==1.0.1
 icalendar==4.0.6
-requests==2.23.0
+requests==2.24.0
 waitress==1.4.4
