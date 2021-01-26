@@ -220,4 +220,4 @@ def main():
     app.logger.debug(f'birthdayfeed {config.version}')
     app.logger.debug(f'Changing log level to {config.log_level}')
     logging.getLogger().setLevel(config.log_level)
-    waitress.serve(app)
+    waitress.serve(app, threads=config.web_server_threads)
