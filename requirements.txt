@@ -1,7 +1,7 @@
 --extra-index-url https://alpine-wheels.github.io/index
 
 Flask==1.1.2
-Werkzeug==1.0.1
+Werkzeug==2.0.0
 icalendar==4.0.7
 requests==2.25.1
 waitress==2.0.0
