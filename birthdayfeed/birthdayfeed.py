@@ -12,8 +12,6 @@ import sys
 import waitress
 import werkzeug.middleware.proxy_fix
 
-from typing import List
-
 config = birthdayfeed.config.Config()
 app = flask.Flask(__name__)
 app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
@@ -47,7 +45,7 @@ def is_leap_day(d):
     return d.month == 2 and d.day == 29
 
 
-def get_all_birthdays(bd: datetime.date) -> List[datetime.date]:
+def get_all_birthdays(bd: datetime.date) -> list[datetime.date]:
     """Given a datetime.date object representing a date of birth, return a list of datetime.date objects representing
     all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever is
     greater."""
