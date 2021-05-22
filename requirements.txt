@@ -10,19 +10,19 @@ certifi==2020.12.5
     # via requests
 chardet==4.0.0
     # via requests
-click==8.0.0
+click==8.0.1
     # via flask
-flask==2.0.0
+flask==2.0.1
     # via -r requirements.in
 icalendar==4.0.7
     # via -r requirements.in
 idna==2.10
     # via requests
-itsdangerous==2.0.0
+itsdangerous==2.0.1
     # via flask
-jinja2==3.0.0
+jinja2==3.0.1
     # via flask
-markupsafe==2.0.0
+markupsafe==2.0.1
     # via jinja2
 python-dateutil==2.8.1
     # via icalendar
@@ -36,5 +36,5 @@ urllib3==1.26.4
     # via requests
 waitress==2.0.0
     # via -r requirements.in
-werkzeug==2.0.0
+werkzeug==2.0.1
     # via flask
