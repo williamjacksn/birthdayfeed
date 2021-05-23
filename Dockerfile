@@ -11,7 +11,7 @@ CMD ["/birthdayfeed/run.py"]
 
 HEALTHCHECK CMD ["wget", "--spider", "--quiet", "http://localhost:8080/"]
 
-ENV APP_VERSION="2021.2" \
+ENV APP_VERSION="2021.3" \
     PYTHONUNBUFFERED="1"
 
 LABEL org.opencontainers.image.authors="William Jackson <william@subtlecoolness.com>" \
