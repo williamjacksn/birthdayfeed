@@ -18,42 +18,12 @@ app = flask.Flask(__name__)
 app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
 
 
-@app.route('/favicon.ico')
-def favicon():
-    return flask.send_from_directory(os.path.join(app.root_path, 'static'), 'birthdayfeed.png')
-
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return flask.render_template('index.html')
-
-
-def row_is_valid(row):
-    if len(row) < 4:
-        return False
-    return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
-
-
 def date_is_valid(year, month, day):
     try:
         datetime.date(year, month, day)
     except ValueError:
         return False
     return True
-
-
-def is_leap_day(d):
-    return d.month == 2 and d.day == 29
-
-
-def get_lang_class(key: str):
-    lang_class_map = {
-        'en-an': birthdayfeed.lang.EnglishAnniversaryTranslator,
-        'en-bd': birthdayfeed.lang.EnglishBirthdayTranslator,
-    }
-    lang_class = lang_class_map.get(key, birthdayfeed.lang.EnglishBirthdayTranslator)
-    app.logger.debug(f'Translation class is {lang_class}')
-    return lang_class
 
 
 def get_all_birthdays(bd: datetime.date) -> list[datetime.date]:
@@ -81,6 +51,16 @@ def get_all_birthdays(bd: datetime.date) -> list[datetime.date]:
     return birthdays
 
 
+def get_lang_class(key: str):
+    lang_class_map = {
+        'en-an': birthdayfeed.lang.EnglishAnniversaryTranslator,
+        'en-bd': birthdayfeed.lang.EnglishBirthdayTranslator,
+    }
+    lang_class = lang_class_map.get(key, birthdayfeed.lang.EnglishBirthdayTranslator)
+    app.logger.debug(f'Translation class is {lang_class}')
+    return lang_class
+
+
 def get_next_birthday(bd):
     """Given a datetime.date object representing a date of birth, return a datetime.date object representing the next
     time this birthday will be celebrated."""
@@ -101,6 +81,30 @@ def get_next_birthday(bd):
             return datetime.date(next_year, 3, 1)
         else:
             return birthday_this_year.replace(year=next_year)
+
+
+def is_leap_day(d):
+    return d.month == 2 and d.day == 29
+
+
+def parse_row(row):
+    year = int(row[1])
+    if year == 0:
+        year = 1
+    month = int(row[2])
+    day = int(row[3])
+    return year, month, day
+
+
+def row_is_valid(row):
+    if len(row) < 4:
+        return False
+    return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return flask.render_template('index.html')
 
 
 @app.route('/birthdayfeed.atom')
@@ -126,11 +130,7 @@ def atom():
             continue
 
         name = html.escape(row[0])
-        year = int(row[1])
-        if year == 0:
-            year = 1
-        month = int(row[2])
-        day = int(row[3])
+        year, month, day = parse_row(row)
 
         if date_is_valid(year, month, day):
             birthday = datetime.date(year, month, day)
@@ -177,11 +177,7 @@ def ics():
             continue
 
         name = row[0]
-        year = int(row[1])
-        if year == 0:
-            year = 1
-        month = int(row[2])
-        day = int(row[3])
+        year, month, day = parse_row(row)
 
         if date_is_valid(year, month, day):
             birthday = datetime.date(year, month, day)
@@ -208,6 +204,11 @@ def ics():
     resp = flask.make_response(cal.to_ical())
     resp.mimetype = 'text/calendar'
     return resp
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return flask.send_from_directory(os.path.join(app.root_path, 'static'), 'birthdayfeed.png')
 
 
 def main():
