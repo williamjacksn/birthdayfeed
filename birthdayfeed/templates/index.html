@@ -8,25 +8,55 @@
         <title>birthdayfeed</title>
     </head>
     <body>
-        <h1><img src="{{ url_for('static', filename='birthday+feed.png') }}" alt="(birthdayfeed icon)">birthdayfeed</h1>
+        <h1>
+            <img src="{{ url_for('static', filename='birthday+feed.png') }}" alt="(birthdayfeed icon)">
+            birthdayfeed
+        </h1>
         <p>Subscribe to birthdays in a feed reader or calendar</p>
         <form method="post">
             <p class="data-location">
                 <label for="d">data location:</label>
                 <input type="text" id="d" name="d" value="{{ request.values.d if request.values.d }}">
+                <select name="l" aria-label="Translation">
+                    {% for t_val, t_name in [
+                        ('en-an', 'Anniversaries (English)'),
+                        ('en-bd', 'Birthdays (English)'),
+                    ] %}
+                    <option value="{{ t_val }}" {{ 'selected' if request.values.l == t_val or t_val == 'en-bd' }}>
+                        {{ t_name }}
+                    </option>
+                    {% endfor %}
+                </select>
                 <input type="submit" value="generate urls" class="button">
             </p><p></p>
         </form>
         {% if request.values.d %}
         <div class="results">
-            <p><strong>Feed reader URL:</strong> <code>{{ url_for('atom', d=request.values.d, _external=True) }}</code></p>
-            <p><a href="https://feedly.uservoice.com/knowledgebase/articles/187494-how-to-add-news-feeds-to-your-feedly">How do I subscribe to a feed in Feedly?</a></p>
-            <p><strong>Calendar URL:</strong> <code>{{ url_for('ics', d=request.values.d, _external=True) }}</code></p>
-            <p><a href="https://support.google.com/calendar/answer/37100">How do I subscribe to a calendar in Google Calendar?</a></p>
+            <p>
+                <strong>Feed reader URL:</strong>
+                <code>{{ url_for('atom', d=request.values.d, l=request.values.l, _external=True) }}</code>
+            </p>
+            <p>
+                <a href="https://feedly.uservoice.com/knowledgebase/articles/187494-how-to-add-news-feeds-to-your-feedly">
+                    How do I subscribe to a feed in Feedly?
+                </a>
+            </p>
+            <p>
+                <strong>Calendar URL:</strong>
+                <code>{{ url_for('ics', d=request.values.d, l=request.values.l, _external=True) }}</code>
+            </p>
+            <p>
+                <a href="https://support.google.com/calendar/answer/37100">
+                    How do I subscribe to a calendar in Google Calendar?
+                </a>
+            </p>
         </div>
         {% endif %}
         <h2>Instructions</h2>
-        <p>The easiest way to get started using <strong>birthdayfeed</strong> is to create a spreadsheet in Google Spreadsheets with the birthdays you want to be reminded of.</p>
+        <p>
+            The easiest way to get started using <strong>birthdayfeed</strong> is to create a spreadsheet in Google
+            Spreadsheets with the birthdays you want to be reminded of.
+        </p>
         <p>The spreadsheet must be formatted in this way:</p>
         <table>
             <tr>
@@ -39,9 +69,18 @@
                 <td><strong>2</strong></td><td>Tom Riddle</td><td>1926</td><td>12</td><td>31</td>
             </tr>
         </table>
-        <p>Column A is a name, Column B is the year of the birthday, Column C is the month, and Column D is the day. <a href="https://docs.google.com/spreadsheets/d/1f2v9uenA4Ka9yzFBqfO64eLIH7No0JDYN4iHW7yTkFQ/edit?usp=sharing">See an example spreadsheet</a>.</p>
-        <p>If you know someone's birthday, but not the year they were born, use "0" for the year and you will be notified, but not told how old that person will turn on their upcoming birthday.</p>
-        <p>Once you have the data in a Google Spreadsheet, you will need to publish it as a CSV file. You do this by following these steps:</p>
+        <p>
+            Column A is a name, Column B is the year of the birthday, Column C is the month, and Column D is the day.
+            <a href="https://docs.google.com/spreadsheets/d/1f2v9uenA4Ka9yzFBqfO64eLIH7No0JDYN4iHW7yTkFQ/edit?usp=sharing">See an example spreadsheet</a>.
+        </p>
+        <p>
+            If you know someone's birthday, but not the year they were born, use "0" for the year and you will be
+            notified, but not told how old that person will turn on their upcoming birthday.
+        </p>
+        <p>
+            Once you have the data in a Google Spreadsheet, you will need to publish it as a CSV file.
+            You do this by following these steps:
+        </p>
         <ol>
             <li>From the <strong>File</strong> menu, choose <strong>Publish to the Web...</strong></li>
             <li>Change <strong>Web page</strong> to <strong>Comma-separated values (.csv)</strong></li>
@@ -49,14 +88,32 @@
             <li>Click the <strong>Publish</strong> button</li>
             <li>Copy the link. You will get something like <a href="https://docs.google.com/spreadsheets/d/1f2v9uenA4Ka9yzFBqfO64eLIH7No0JDYN4iHW7yTkFQ/pub?output=csv"><code>https://docs.google.com/spreadsheets/d/1f2v9uenA4Ka9yzFBqfO64eLIH7No0JDYN4iHW7yTkFQ/pub?output=csv</code></a></li>
         </ol>
-        <p>Come back to this page and paste the link to the CSV file into the <strong>data location:</strong> field at the top of the page. Subscribe to the URL that is presented to you.</p>
-        <p><strong>In a feed reader</strong>, a birthday will appear in the feed seven days before it is to be celebrated, which should be enough time to prepare a card or gift for the acquaintance.</p>
-        <p><strong>In a calendar</strong>, there will only be an event for the acquaintance's next birthday from the current day.</p>
+        <p>
+            Come back to this page and paste the link to the CSV file into the <strong>data location:</strong>
+            field at the top of the page. Subscribe to the URL that is presented to you.
+        </p>
+        <p>
+            <strong>In a feed reader</strong>, a birthday will appear in the feed seven days before it is to be
+            celebrated, which should be enough time to prepare a card or gift for the acquaintance.
+        </p>
+        <p>
+            <strong>In a calendar</strong>, there will only be an event for the acquaintance's next birthday
+            from the current day.
+        </p>
         <h2>Details</h2>
         <h3>Data Location</h3>
-        <p>You don't have to use Google Spreadsheets to store your data. You can put a CSV file anywhere on the Internet. birthdayfeed does not cache the data location or the data itself.</p>
+        <p>
+            You don't have to use Google Spreadsheets to store your data. You can put a CSV file anywhere on the
+            Internet. birthdayfeed does not cache the data location or the data itself.
+        </p>
         <h3>Leap Day</h3>
-        <p>Some people are born on February 29, but there is not a February 29 in every year. In years without such a day, the birthday will be assigned to March 1. To remove ambiguity, birthdayfeed mentions the original date of birth as well as the next birthday.</p>
-        <p class="legal"><a href="https://github.com/williamjacksn/birthdayfeed">birthdayfeed is open source software</a></p>
+        <p>
+            Some people are born on February 29, but there is not a February 29 in every year.
+            In years without such a day, the birthday will be assigned to March 1.
+            To remove ambiguity, birthdayfeed mentions the original date of birth as well as the next birthday.
+        </p>
+        <p class="legal">
+            <a href="https://github.com/williamjacksn/birthdayfeed">birthdayfeed is open source software</a>
+        </p>
     </body>
 </html>
