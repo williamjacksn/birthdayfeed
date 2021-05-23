@@ -1,4 +1,4 @@
-import birthdayfeed.birthdayfeed
+import birthdayfeed.app
 import signal
 import sys
 
@@ -8,4 +8,4 @@ def handle_sigterm(_signal, _frame):
 
 
 signal.signal(signal.SIGTERM, handle_sigterm)
-birthdayfeed.birthdayfeed.main()
+birthdayfeed.app.main()

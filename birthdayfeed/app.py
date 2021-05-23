@@ -1,4 +1,5 @@
 import birthdayfeed.config
+import birthdayfeed.lang
 import calendar
 import csv
 import datetime
@@ -96,9 +97,13 @@ def get_next_birthday(bd):
 def atom():
     if 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
-    notification_days = 7
-    if 'notification_days' in flask.request.args:
-        notification_days = int(flask.request.args['notification_days'])
+    notification_days = int(flask.request.args.get('notification_days', '7'))
+
+    lang = flask.request.args.get('l', 'en_US')
+    lang_class = {
+        'en_US': birthdayfeed.lang.EnglishBirthdayTranslator,
+    }.get(lang, birthdayfeed.lang.EnglishBirthdayTranslator)
+    app.logger.debug(f'Translation class is {lang_class}')
 
     c = {}
 
@@ -127,19 +132,14 @@ def atom():
             continue
 
         next_birthday = get_next_birthday(birthday)
-        bd_next = f'{next_birthday:%A, %B} {next_birthday.day}, {next_birthday.year}'
         if next_birthday - today <= notification_interval:
-            if year == 1:
-                title = f'{name}, born {birthday:%B} {birthday.day}, will celebrate a birthday on {bd_next}'
-            else:
-                age = next_birthday.year - birthday.year
-                title = f'{name}, born {birthday:%B} {birthday.day}, {birthday.year}, will turn {age} on {bd_next}'
+            t = lang_class(name, birthday, next_birthday)
             update_date = next_birthday - notification_interval
             update_string = f'{update_date.isoformat()}T00:00:00Z'
             id_name = name.replace(' ', '-')
             url = flask.url_for('index', _external=True)
             id_s = f'{url}{id_name}/{next_birthday.year}'
-            c['birthdays'].append({'title': title, 'updated': update_string, 'id': id_s})
+            c['birthdays'].append({'title': t.description, 'updated': update_string, 'id': id_s})
 
     resp = flask.make_response(flask.render_template('birthdayfeed.atom', c=c))
     resp.mimetype = 'application/atom+xml'
@@ -150,6 +150,12 @@ def atom():
 def ics():
     if 'icsd' not in flask.request.args and 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
+
+    lang = flask.request.args.get('l', 'en_US')
+    lang_class = {
+        'en_US': birthdayfeed.lang.EnglishBirthdayTranslator,
+    }.get(lang, birthdayfeed.lang.EnglishBirthdayTranslator)
+    app.logger.debug(f'Translation class is {lang_class}')
 
     cal = icalendar.Calendar()
     cal.add('version', '2.0')
@@ -181,29 +187,18 @@ def ics():
             continue
 
         for next_birthday in get_all_birthdays(birthday):
+            t = lang_class(name, birthday, next_birthday)
             event = icalendar.Event()
-            bd_next = f'{next_birthday:%A, %B} {next_birthday.day}, {next_birthday.year}'
-            if year == 1:
-                summary = f"{name}'s birthday"
-                desc = f'{name}, born {birthday:%B} {birthday.day}, will celebrate a birthday on {bd_next}'
-            else:
-                age = next_birthday.year - birthday.year
-                if age == 0:
-                    summary = f'{name} is born'
-                    desc = f'{name} was born on {bd_next}'
-                else:
-                    summary = f'{name} turns {age}'
-                    desc = f'{name}, born {birthday:%B} {birthday.day}, {birthday.year}, will turn {age} on {bd_next}'
             day_after = next_birthday + datetime.timedelta(days=1)
             uid_name = name.replace(' ', '')
             uid = f'{uid_name}{next_birthday.year}'
-            event.add('summary', summary)
+            event.add('summary', t.summary)
             event.add('dtstart', next_birthday)
             event.add('dtend', day_after)
             event.add('dtstamp', dtstamp)
             event.add('uid', f'{uid}@birthdayfeed.subtlecoolness.com')
             event.add('created', dtstamp)
-            event.add('description', desc)
+            event.add('description', t.description)
             event.add('last-modified', dtstamp)
             event.add('transp', 'TRANSPARENT')
             cal.add_component(event)
