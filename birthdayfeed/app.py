@@ -46,6 +46,16 @@ def is_leap_day(d):
     return d.month == 2 and d.day == 29
 
 
+def get_lang_class(key: str):
+    lang_class_map = {
+        'en-an': birthdayfeed.lang.EnglishAnniversaryTranslator,
+        'en-bd': birthdayfeed.lang.EnglishBirthdayTranslator,
+    }
+    lang_class = lang_class_map.get(key, birthdayfeed.lang.EnglishBirthdayTranslator)
+    app.logger.debug(f'Translation class is {lang_class}')
+    return lang_class
+
+
 def get_all_birthdays(bd: datetime.date) -> list[datetime.date]:
     """Given a datetime.date object representing a date of birth, return a list of datetime.date objects representing
     all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever is
@@ -99,11 +109,7 @@ def atom():
         return flask.redirect(flask.url_for('index'), 303)
     notification_days = int(flask.request.args.get('notification_days', '7'))
 
-    lang = flask.request.args.get('l', 'en_US')
-    lang_class = {
-        'en_US': birthdayfeed.lang.EnglishBirthdayTranslator,
-    }.get(lang, birthdayfeed.lang.EnglishBirthdayTranslator)
-    app.logger.debug(f'Translation class is {lang_class}')
+    lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
 
     c = {}
 
@@ -151,11 +157,7 @@ def ics():
     if 'icsd' not in flask.request.args and 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
 
-    lang = flask.request.args.get('l', 'en_US')
-    lang_class = {
-        'en_US': birthdayfeed.lang.EnglishBirthdayTranslator,
-    }.get(lang, birthdayfeed.lang.EnglishBirthdayTranslator)
-    app.logger.debug(f'Translation class is {lang_class}')
+    lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
 
     cal = icalendar.Calendar()
     cal.add('version', '2.0')
