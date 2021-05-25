@@ -26,26 +26,26 @@ def date_is_valid(year, month, day):
     return True
 
 
-def get_all_birthdays(bd: datetime.date) -> list[datetime.date]:
+def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
     """Given a datetime.date object representing a date of birth, return a list of datetime.date objects representing
     all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever is
     greater."""
 
-    if bd.year == 1:
-        return [get_next_birthday(bd)]
+    if origin.year == 1:
+        return [get_next_birthday(origin)]
 
-    birthdays = [bd]
+    birthdays = [origin]
     today = datetime.date.today()
     next_year = today.year + 1
 
     offset = 0
-    this_bd = bd
+    this_bd = origin
     while this_bd.year < next_year or offset < 85:
         offset = offset + 1
         try:
-            this_bd = bd.replace(year=bd.year + offset)
+            this_bd = origin.replace(year=origin.year + offset)
         except ValueError:
-            this_bd = datetime.date(bd.year + offset, 3, 1)
+            this_bd = datetime.date(origin.year + offset, 3, 1)
         birthdays.append(this_bd)
 
     return birthdays
