@@ -1,6 +1,6 @@
 --extra-index-url https://alpine-wheels.github.io/index
 
-Flask
+flask
 icalendar
 inflect
 requests
