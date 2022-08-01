@@ -40,7 +40,7 @@ six==1.16.0
     # via python-dateutil
 typing-extensions==4.3.0
     # via pydantic
-urllib3==1.26.10
+urllib3==1.26.11
     # via requests
 waitress==2.1.2
     # via -r requirements.in
