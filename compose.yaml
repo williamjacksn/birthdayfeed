@@ -1,8 +1,15 @@
-version: '3.8'
-
 services:
   birthdayfeed:
     image: ghcr.io/williamjacksn/birthdayfeed
     init: true
     ports:
       - 8080:8080
+
+  shell:
+    entrypoint:
+      - /bin/sh
+    image: ghcr.io/williamjacksn/birthdayfeed
+    init: true
+    volumes:
+      - ./:/home/python/birthdayfeed
+    working_dir: /home/python/birthdayfeed
