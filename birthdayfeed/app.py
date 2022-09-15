@@ -135,7 +135,7 @@ def atom():
     c['birthdays'] = []
     notification_interval = datetime.timedelta(days=notification_days)
     data_location = flask.request.args.get('d')
-    app.logger.info(f'Building atom with data from {data_location}')
+    app.logger.info(f'  building atom: {data_location}')
     c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location)
     for row in csv.reader(response.text.splitlines()):
@@ -184,7 +184,7 @@ def ics():
     dtstamp = datetime.datetime.combine(today, datetime.time())
 
     data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
-    app.logger.info(f'Building ics with data from {data_location}')
+    app.logger.info(f'   building ics: {data_location}')
 
     response = requests.get(data_location)
     for row in csv.reader(response.text.splitlines()):
