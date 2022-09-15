@@ -1,9 +1,11 @@
 services:
-  birthdayfeed:
+  app:
     image: ghcr.io/williamjacksn/birthdayfeed
     init: true
     ports:
       - 8080:8080
+    volumes:
+      - ./:/home/python/birthdayfeed
 
   shell:
     entrypoint:
