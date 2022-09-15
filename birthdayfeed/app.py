@@ -8,6 +8,7 @@ import html
 import icalendar
 import os
 import requests
+import resource
 import waitress
 import werkzeug.middleware.proxy_fix
 
@@ -98,6 +99,19 @@ def row_is_valid(row):
     if len(row) < 4:
         return False
     return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
+
+
+@app.before_request
+def before_request():
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    app.logger.info(f'  before maxrss: {usage.ru_maxrss}')
+
+
+@app.teardown_request
+def teardown_request(response):
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    app.logger.info(f'teardown maxrss: {usage.ru_maxrss}')
+    return response
 
 
 @app.route('/', methods=['GET', 'POST'])
