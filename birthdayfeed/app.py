@@ -105,6 +105,8 @@ def row_is_valid(row):
 def before_request():
     usage = resource.getrusage(resource.RUSAGE_SELF)
     app.logger.info(f'  before maxrss: {usage.ru_maxrss}')
+    user_agent = flask.request.headers.get('user-agent')
+    app.logger.info(f'     user-agent: {user_agent}')
 
 
 @app.teardown_request
