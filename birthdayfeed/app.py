@@ -137,8 +137,8 @@ def atom():
     data_location = flask.request.args.get('d')
     app.logger.info(f'  building atom: {data_location}')
     c['escaped_location'] = html.escape(data_location)
-    response = requests.get(data_location)
-    for row in csv.reader(response.text.splitlines()):
+    response = requests.get(data_location, stream=True)
+    for row in csv.reader(response.iter_lines(decode_unicode=True)):
         if not row_is_valid(row):
             continue
 
@@ -186,8 +186,8 @@ def ics():
     data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
     app.logger.info(f'   building ics: {data_location}')
 
-    response = requests.get(data_location)
-    for row in csv.reader(response.text.splitlines()):
+    response = requests.get(data_location, stream=True)
+    for row in csv.reader(response.iter_lines(decode_unicode=True)):
         if not row_is_valid(row):
             continue
 
