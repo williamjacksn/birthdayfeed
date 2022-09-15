@@ -104,7 +104,7 @@ def row_is_valid(row):
 
 @app.before_request
 def before_request():
-    flask.g.request_id = random.randbytes(8).hex()
+    flask.g.request_id = random.randbytes(4).hex()
     usage = resource.getrusage(resource.RUSAGE_SELF)
     app.logger.info(f'{flask.g.request_id} - before maxrss: {usage.ru_maxrss}')
     user_agent = flask.request.headers.get('user-agent')
