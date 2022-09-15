@@ -7,6 +7,7 @@ import flask
 import html
 import icalendar
 import os
+import random
 import requests
 import resource
 import waitress
@@ -103,16 +104,17 @@ def row_is_valid(row):
 
 @app.before_request
 def before_request():
+    flask.g.request_id = random.randbytes(8).hex()
     usage = resource.getrusage(resource.RUSAGE_SELF)
-    app.logger.info(f'  before maxrss: {usage.ru_maxrss}')
+    app.logger.info(f'{flask.g.request_id} - before maxrss: {usage.ru_maxrss}')
     user_agent = flask.request.headers.get('user-agent')
-    app.logger.info(f'     user-agent: {user_agent}')
+    app.logger.info(f'{flask.g.request_id} ---- user-agent: {user_agent}')
 
 
 @app.teardown_request
 def teardown_request(response):
     usage = resource.getrusage(resource.RUSAGE_SELF)
-    app.logger.info(f'teardown maxrss: {usage.ru_maxrss}')
+    app.logger.info(f'{flask.g.request_id} teardown maxrss: {usage.ru_maxrss}')
     return response
 
 
@@ -137,7 +139,7 @@ def atom():
     c['birthdays'] = []
     notification_interval = datetime.timedelta(days=notification_days)
     data_location = flask.request.args.get('d')
-    app.logger.info(f'  building atom: {data_location}')
+    app.logger.info(f'{flask.g.request_id} - building atom: {data_location}')
     c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location, stream=True)
     for row in csv.reader(response.iter_lines(decode_unicode=True)):
@@ -186,7 +188,7 @@ def ics():
     dtstamp = datetime.datetime.combine(today, datetime.time())
 
     data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
-    app.logger.info(f'   building ics: {data_location}')
+    app.logger.info(f'{flask.g.request_id} -- building ics: {data_location}')
 
     response = requests.get(data_location, stream=True)
     for row in csv.reader(response.iter_lines(decode_unicode=True)):
