@@ -124,7 +124,7 @@ def atom():
     app.logger.info(f'Building atom with data from {data_location}')
     c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location)
-    for row in csv.reader(response.content.decode().splitlines()):
+    for row in csv.reader(response.text.splitlines()):
         if not row_is_valid(row):
             continue
 
@@ -173,7 +173,7 @@ def ics():
     app.logger.info(f'Building ics with data from {data_location}')
 
     response = requests.get(data_location)
-    for row in csv.reader(response.content.decode().splitlines()):
+    for row in csv.reader(response.text.splitlines()):
         if not row_is_valid(row):
             continue
 
