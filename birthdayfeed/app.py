@@ -6,10 +6,8 @@ import datetime
 import flask
 import html
 import icalendar
-import logging
 import os
 import requests
-import sys
 import waitress
 import werkzeug.middleware.proxy_fix
 
@@ -123,6 +121,7 @@ def atom():
     c['birthdays'] = []
     notification_interval = datetime.timedelta(days=notification_days)
     data_location = flask.request.args.get('d')
+    app.logger.info(f'Building atom with data from {data_location}')
     c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
@@ -171,6 +170,8 @@ def ics():
     dtstamp = datetime.datetime.combine(today, datetime.time())
 
     data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
+    app.logger.info(f'Building ics with data from {data_location}')
+
     response = requests.get(data_location)
     for row in csv.reader(response.content.decode().splitlines()):
         if not row_is_valid(row):
@@ -212,8 +213,5 @@ def favicon():
 
 
 def main():
-    logging.basicConfig(format=config.log_format, level='DEBUG', stream=sys.stdout)
-    app.logger.debug(f'birthdayfeed {config.version}')
-    app.logger.debug(f'Changing log level to {config.log_level}')
-    logging.getLogger().setLevel(config.log_level)
+    app.logger.info(f'birthdayfeed {config.version}')
     waitress.serve(app, threads=config.web_server_threads)
