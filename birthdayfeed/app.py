@@ -191,6 +191,7 @@ def ics():
     app.logger.info(f'{flask.g.request_id} -- building ics: {data_location}')
 
     response = requests.get(data_location, stream=True)
+    row_count = 0
     for row in csv.reader(response.iter_lines(decode_unicode=True)):
         if not row_is_valid(row):
             continue
@@ -203,22 +204,40 @@ def ics():
         else:
             continue
 
-        for next_birthday in get_all_birthdays(birthday):
-            t = lang_class(name, birthday, next_birthday)
+        if row_count < 10:
+            for next_birthday in get_all_birthdays(birthday):
+                t = lang_class(name, birthday, next_birthday)
+                event = icalendar.Event()
+                day_after = next_birthday + datetime.timedelta(days=1)
+                uid_name = name.replace(' ', '')
+                uid = f'{uid_name}{next_birthday.year}'
+                event.add('summary', t.summary)
+                event.add('dtstart', next_birthday)
+                event.add('dtend', day_after)
+                event.add('dtstamp', dtstamp)
+                event.add('uid', f'{uid}@birthdayfeed.subtlecoolness.com')
+                event.add('created', dtstamp)
+                event.add('description', t.description)
+                event.add('last-modified', dtstamp)
+                event.add('transp', 'TRANSPARENT')
+                cal.add_component(event)
+            app.logger.info(f'{flask.g.request_id} ---- ics events: {len(cal.subcomponents)}')
+            row_count += 1
+        else:
+            app.logger.info(f'{flask.g.request_id} max rows reached')
             event = icalendar.Event()
-            day_after = next_birthday + datetime.timedelta(days=1)
-            uid_name = name.replace(' ', '')
-            uid = f'{uid_name}{next_birthday.year}'
-            event.add('summary', t.summary)
-            event.add('dtstart', next_birthday)
-            event.add('dtend', day_after)
+            event.add('summary', 'Thank you for using birthdayfeed')
+            event.add('dtstart', today)
+            event.add('dtend', dtstamp + datetime.timedelta(days=1))
             event.add('dtstamp', dtstamp)
-            event.add('uid', f'{uid}@birthdayfeed.subtlecoolness.com')
+            event.add('uid', f'thanks@birthdayfeed.subtlecoolness.com')
             event.add('created', dtstamp)
-            event.add('description', t.description)
+            event.add('description', 'The free version of birthdayfeed only supports 10 rows in a source file')
             event.add('last-modified', dtstamp)
             event.add('transp', 'TRANSPARENT')
             cal.add_component(event)
+            response.close()
+            break
 
     resp = flask.make_response(cal.to_ical())
     resp.mimetype = 'text/calendar'
