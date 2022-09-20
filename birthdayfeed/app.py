@@ -14,7 +14,7 @@ import werkzeug.middleware.proxy_fix
 
 from typing import Type
 
-__version__ = '2021.4'
+__version__ = '2022.1'
 __max_rows__ = int(os.getenv('MAX_ROWS', 10))
 __web_server_threads__ = int(os.getenv('WEB_SERVER_THREADS', 8))
 
