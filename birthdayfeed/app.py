@@ -27,9 +27,9 @@ def date_is_valid(year, month, day):
 
 
 def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
-    """Given a datetime.date object representing a date of birth, return a list of datetime.date objects representing
-    all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever is
-    greater."""
+    """Given a `datetime.date` object representing a date of birth, return a list of `datetime.date` objects
+    representing all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever
+    is greater."""
 
     if origin.year == 1:
         return [get_next_birthday(origin)]
