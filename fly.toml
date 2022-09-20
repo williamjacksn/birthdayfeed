@@ -3,11 +3,6 @@ kill_signal = "SIGTERM"
 kill_timeout = 5
 processes = []
 
-[build]
-  image = "ghcr.io/williamjacksn/birthdayfeed:2022.2"
-
-[env]
-
 [[services]]
   http_checks = []
   internal_port = 8080
