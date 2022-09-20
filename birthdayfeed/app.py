@@ -22,7 +22,7 @@ app = flask.Flask(__name__)
 app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
 
 
-def date_is_valid(year, month, day):
+def date_is_valid(year: int, month: int, day: int) -> bool:
     try:
         datetime.date(year, month, day)
     except ValueError:
@@ -65,7 +65,7 @@ def get_lang_class(key: str) -> Type[birthdayfeed.lang.DefaultTranslator]:
     return lang_class
 
 
-def get_next_birthday(bd):
+def get_next_birthday(bd: datetime.date) -> datetime.date:
     """Given a `datetime.date` object representing a date of birth, return a `datetime.date` object representing the
     next time this birthday will be celebrated."""
 
@@ -87,11 +87,11 @@ def get_next_birthday(bd):
             return birthday_this_year.replace(year=next_year)
 
 
-def is_leap_day(d):
+def is_leap_day(d: datetime.date) -> bool:
     return d.month == 2 and d.day == 29
 
 
-def parse_row(row):
+def parse_row(row: list[str]) -> tuple[int, int, int]:
     year = int(row[1])
     if year == 0:
         year = 1
@@ -100,7 +100,7 @@ def parse_row(row):
     return year, month, day
 
 
-def row_is_valid(row):
+def row_is_valid(row: list[str]) -> bool:
     if len(row) < 4:
         return False
     return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
