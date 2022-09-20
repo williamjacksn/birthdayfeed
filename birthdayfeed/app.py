@@ -69,7 +69,8 @@ def get_next_birthday(bd: datetime.date) -> datetime.date:
     """Given a `datetime.date` object representing a date of birth, return a `datetime.date` object representing the
     next time this birthday will be celebrated."""
 
-    today = datetime.date.today()
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    today = now.date()
     this_year = today.year
     next_year = today.year + 1
 
