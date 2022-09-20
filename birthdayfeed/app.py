@@ -12,6 +12,8 @@ import resource
 import waitress
 import werkzeug.middleware.proxy_fix
 
+from typing import Type
+
 __version__ = '2021.4'
 __max_rows__ = int(os.getenv('MAX_ROWS', 10))
 __web_server_threads__ = int(os.getenv('WEB_SERVER_THREADS', 8))
@@ -53,7 +55,7 @@ def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
     return birthdays
 
 
-def get_lang_class(key: str):
+def get_lang_class(key: str) -> Type[birthdayfeed.lang.DefaultTranslator]:
     lang_class_map = {
         'en-an': birthdayfeed.lang.EnglishAnniversaryTranslator,
         'en-bd': birthdayfeed.lang.EnglishBirthdayTranslator,
@@ -64,8 +66,8 @@ def get_lang_class(key: str):
 
 
 def get_next_birthday(bd):
-    """Given a datetime.date object representing a date of birth, return a datetime.date object representing the next
-    time this birthday will be celebrated."""
+    """Given a `datetime.date` object representing a date of birth, return a `datetime.date` object representing the
+    next time this birthday will be celebrated."""
 
     today = datetime.date.today()
     this_year = today.year
