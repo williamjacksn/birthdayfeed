@@ -4,10 +4,9 @@ kill_timeout = 5
 processes = []
 
 [build]
-  image = "ghcr.io/williamjacksn/birthdayfeed:2022.1"
+  image = "ghcr.io/williamjacksn/birthdayfeed:2022.2"
 
 [env]
-  MAX_ROWS = "20"
 
 [[services]]
   http_checks = []
