@@ -187,7 +187,7 @@ def ics():
     cal.add('calscale', 'GREGORIAN')
     cal.add('x-wr-calname', 'birthdayfeed')
     cal.add('x-wr-timezone', 'UTC')
-    cal.add('x-wr-caldesc', 'Birthday calendar provided by https://birthdayfeed.subtlecoolness.com/')
+    cal.add('x-wr-caldesc', f'Birthday calendar provided by {flask.request.host_url}')
 
     today = datetime.date.today()
     dtstamp = datetime.datetime.combine(today, datetime.time())
@@ -220,7 +220,7 @@ def ics():
                 event.add('dtstart', next_birthday)
                 event.add('dtend', day_after)
                 event.add('dtstamp', dtstamp)
-                event.add('uid', f'{uid}@birthdayfeed.subtlecoolness.com')
+                event.add('uid', f'{uid}@{flask.request.host}')
                 event.add('created', dtstamp)
                 event.add('description', t.description)
                 event.add('last-modified', dtstamp)
@@ -235,7 +235,7 @@ def ics():
             event.add('dtstart', today)
             event.add('dtend', dtstamp + datetime.timedelta(days=1))
             event.add('dtstamp', dtstamp)
-            event.add('uid', f'thanks@birthdayfeed.subtlecoolness.com')
+            event.add('uid', f'thanks@{flask.request.host}')
             event.add('created', dtstamp)
             _desc = f'This instance of birthdayfeed only supports up to {__max_rows__} rows in a source file.'
             event.add('description', _desc)
