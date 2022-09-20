@@ -15,7 +15,6 @@ import werkzeug.middleware.proxy_fix
 from typing import Type
 
 __version__ = '2022.1'
-__max_rows__ = int(os.getenv('MAX_ROWS', 10))
 __web_server_threads__ = int(os.getenv('WEB_SERVER_THREADS', 8))
 
 app = flask.Flask(__name__)
@@ -179,37 +178,34 @@ def ics():
     if 'icsd' not in flask.request.args and 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
 
-    lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
+    def generate(csv_url: str, lang_class: Type[birthdayfeed.lang.DefaultTranslator]):
+        cal = icalendar.Calendar()
+        cal.add('version', '2.0')
+        cal.add('prodid', '-//birthdayfeed.subtlecoolness.com')
+        cal.add('calscale', 'GREGORIAN')
+        cal.add('x-wr-calname', 'birthdayfeed')
+        cal.add('x-wr-timezone', 'UTC')
+        cal.add('x-wr-caldesc', f'Birthday calendar provided by {flask.request.host_url}')
+        for line in cal.to_ical().splitlines(keepends=True):
+            if not line.startswith(b'END:'):
+                yield line
 
-    cal = icalendar.Calendar()
-    cal.add('version', '2.0')
-    cal.add('prodid', '-//birthdayfeed.subtlecoolness.com')
-    cal.add('calscale', 'GREGORIAN')
-    cal.add('x-wr-calname', 'birthdayfeed')
-    cal.add('x-wr-timezone', 'UTC')
-    cal.add('x-wr-caldesc', f'Birthday calendar provided by {flask.request.host_url}')
+        today = datetime.date.today()
+        dtstamp = datetime.datetime.combine(today, datetime.time())
 
-    today = datetime.date.today()
-    dtstamp = datetime.datetime.combine(today, datetime.time())
+        response = requests.get(csv_url, stream=True)
+        for row in csv.reader(response.iter_lines(decode_unicode=True)):
+            if not row_is_valid(row):
+                continue
 
-    data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
-    app.logger.info(f'{flask.g.request_id} -- building ics: {data_location}')
+            name = row[0]
+            year, month, day = parse_row(row)
 
-    response = requests.get(data_location, stream=True)
-    row_count = 0
-    for row in csv.reader(response.iter_lines(decode_unicode=True)):
-        if not row_is_valid(row):
-            continue
+            if date_is_valid(year, month, day):
+                birthday = datetime.date(year, month, day)
+            else:
+                continue
 
-        name = row[0]
-        year, month, day = parse_row(row)
-
-        if date_is_valid(year, month, day):
-            birthday = datetime.date(year, month, day)
-        else:
-            continue
-
-        if row_count < __max_rows__:
             for next_birthday in get_all_birthdays(birthday):
                 t = lang_class(name, birthday, next_birthday)
                 event = icalendar.Event()
@@ -225,27 +221,17 @@ def ics():
                 event.add('description', t.description)
                 event.add('last-modified', dtstamp)
                 event.add('transp', 'TRANSPARENT')
-                cal.add_component(event)
-            app.logger.info(f'{flask.g.request_id} ---- ics events: {len(cal.subcomponents)}')
-            row_count += 1
-        else:
-            app.logger.info(f'{flask.g.request_id} max rows reached')
-            event = icalendar.Event()
-            event.add('summary', 'Thank you for using birthdayfeed')
-            event.add('dtstart', today)
-            event.add('dtend', dtstamp + datetime.timedelta(days=1))
-            event.add('dtstamp', dtstamp)
-            event.add('uid', f'thanks@{flask.request.host}')
-            event.add('created', dtstamp)
-            _desc = f'This instance of birthdayfeed only supports up to {__max_rows__} rows in a source file.'
-            event.add('description', _desc)
-            event.add('last-modified', dtstamp)
-            event.add('transp', 'TRANSPARENT')
-            cal.add_component(event)
-            response.close()
-            break
+                yield event.to_ical()
 
-    resp = flask.make_response(cal.to_ical())
+        for line in cal.to_ical().splitlines(keepends=True):
+            if line.startswith(b'END:'):
+                yield line
+
+    data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
+    app.logger.info(f'{flask.g.request_id} -- building ics: {data_location}')
+    _lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
+
+    resp = flask.make_response(flask.stream_with_context(generate(data_location, _lang_class)))
     resp.mimetype = 'text/calendar'
     return resp
 
