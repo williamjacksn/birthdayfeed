@@ -1,4 +1,3 @@
-import birthdayfeed.config
 import birthdayfeed.lang
 import calendar
 import csv
@@ -13,7 +12,10 @@ import resource
 import waitress
 import werkzeug.middleware.proxy_fix
 
-config = birthdayfeed.config.Config()
+__version__ = '2021.4'
+__max_rows__ = int(os.getenv('MAX_ROWS', 10))
+__web_server_threads__ = int(os.getenv('WEB_SERVER_THREADS', 8))
+
 app = flask.Flask(__name__)
 app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
 
@@ -204,7 +206,7 @@ def ics():
         else:
             continue
 
-        if row_count < 10:
+        if row_count < __max_rows__:
             for next_birthday in get_all_birthdays(birthday):
                 t = lang_class(name, birthday, next_birthday)
                 event = icalendar.Event()
@@ -232,7 +234,8 @@ def ics():
             event.add('dtstamp', dtstamp)
             event.add('uid', f'thanks@birthdayfeed.subtlecoolness.com')
             event.add('created', dtstamp)
-            event.add('description', 'The free version of birthdayfeed only supports 10 rows in a source file')
+            _desc = f'This instance of birthdayfeed only supports up to {__max_rows__} rows in a source file.'
+            event.add('description', _desc)
             event.add('last-modified', dtstamp)
             event.add('transp', 'TRANSPARENT')
             cal.add_component(event)
@@ -250,5 +253,5 @@ def favicon():
 
 
 def main():
-    app.logger.info(f'birthdayfeed {config.version}')
-    waitress.serve(app, threads=config.web_server_threads)
+    app.logger.info(f'birthdayfeed {__version__}')
+    waitress.serve(app, threads=__web_server_threads__)
