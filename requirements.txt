@@ -30,7 +30,7 @@ markupsafe==2.1.2
     #   werkzeug
 notch==2022.1
     # via -r requirements.in
-pydantic==1.10.4
+pydantic==1.10.5
     # via inflect
 python-dateutil==2.8.2
     # via icalendar
@@ -40,7 +40,7 @@ requests==2.28.2
     # via -r requirements.in
 six==1.16.0
     # via python-dateutil
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via pydantic
 urllib3==1.26.14
     # via requests
