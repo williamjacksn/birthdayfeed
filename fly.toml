@@ -1,6 +1,7 @@
 app = "birthdayfeed"
 kill_signal = "SIGTERM"
 kill_timeout = 5
+primary_region = "dfw"
 processes = []
 
 [[services]]
