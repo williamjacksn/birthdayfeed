@@ -1,15 +1,15 @@
 app = "birthdayfeed"
 kill_signal = "SIGTERM"
-kill_timeout = 5
+kill_timeout = "5s"
 primary_region = "dfw"
-processes = []
+
+[env]
+  PRIMARY_REGION = "dfw"
 
 [[services]]
-  http_checks = []
   internal_port = 8080
   processes = ["app"]
   protocol = "tcp"
-  script_checks = []
   [services.concurrency]
     hard_limit = 25
     soft_limit = 20
