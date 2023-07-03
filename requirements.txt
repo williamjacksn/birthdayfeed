@@ -20,7 +20,7 @@ icalendar==5.0.7
     # via -r requirements.in
 idna==3.4
     # via requests
-inflect==6.0.4
+inflect==6.1.1
     # via -r requirements.in
 itsdangerous==2.1.2
     # via flask
