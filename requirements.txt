@@ -20,7 +20,7 @@ icalendar==5.0.7
     # via -r requirements.in
 idna==3.4
     # via requests
-inflect==6.1.1
+inflect==6.2.0
     # via -r requirements.in
 itsdangerous==2.1.2
     # via flask
@@ -43,7 +43,9 @@ requests==2.31.0
 six==1.16.0
     # via python-dateutil
 typing-extensions==4.7.1
-    # via pydantic
+    # via
+    #   inflect
+    #   pydantic
 urllib3==2.0.3
     # via requests
 waitress==2.1.2
