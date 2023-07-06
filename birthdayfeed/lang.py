@@ -1,5 +1,14 @@
 import datetime
-import inflect
+
+
+def ordinal(n: int) -> str:
+    """Convert an int (1) to an ordinal ('1st')."""
+    # https://leancrew.com/all-this/2020/06/ordinals-in-python/
+    suffix = ['th', 'st', 'nd', 'rd'] + ['th'] * 10
+    v = n % 100
+    if v > 13:
+        v = v % 10
+    return f'{n}{suffix[v]}'
 
 
 class DefaultTranslator:
@@ -51,8 +60,6 @@ class EnglishBirthdayTranslator(DefaultTranslator):
 
 
 class EnglishAnniversaryTranslator(DefaultTranslator):
-    inf = inflect.engine()
-
     @property
     def summary(self) -> str:
         if self.origin.year == 1:
@@ -60,7 +67,7 @@ class EnglishAnniversaryTranslator(DefaultTranslator):
         elif self.age == 0:
             return f'{self.name} get married'
         else:
-            return f'{self.name} celebrate their {self.inf.ordinal(self.age)} anniversary'
+            return f'{self.name} celebrate their {ordinal(self.age)} anniversary'
 
     @property
     def description(self) -> str:
@@ -71,4 +78,4 @@ class EnglishAnniversaryTranslator(DefaultTranslator):
             return f'{self.name} got married on {self.target_full}'
         else:
             return (f'{self.name}, married on {self.origin_full}, '
-                    f'will celebrate their {self.inf.ordinal(self.age)} anniversary on {self.target_full}')
+                    f'will celebrate their {ordinal(self.age)} anniversary on {self.target_full}')

@@ -2,7 +2,6 @@
 
 flask
 icalendar
-inflect
 notch
 requests
 waitress
