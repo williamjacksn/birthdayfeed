@@ -32,7 +32,7 @@ notch==2022.1
     # via -r requirements.in
 python-dateutil==2.8.2
     # via icalendar
-pytz==2023.3
+pytz==2023.3.post1
     # via icalendar
 requests==2.31.0
     # via -r requirements.in
