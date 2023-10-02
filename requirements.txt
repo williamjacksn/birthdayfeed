@@ -14,7 +14,7 @@ charset-normalizer==3.2.0
     # via requests
 click==8.1.7
     # via flask
-flask==2.3.3
+flask==3.0.0
     # via -r requirements.in
 icalendar==5.0.10
     # via -r requirements.in
@@ -42,5 +42,5 @@ urllib3==2.0.5
     # via requests
 waitress==2.1.2
     # via -r requirements.in
-werkzeug==2.3.7
+werkzeug==3.0.0
     # via flask
