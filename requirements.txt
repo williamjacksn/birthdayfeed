@@ -8,7 +8,7 @@
 
 blinker==1.7.0
     # via flask
-certifi==2023.7.22
+certifi==2023.11.17
     # via requests
 charset-normalizer==3.3.2
     # via requests
@@ -18,7 +18,7 @@ flask==3.0.0
     # via -r requirements.in
 icalendar==5.0.11
     # via -r requirements.in
-idna==3.4
+idna==3.6
     # via requests
 itsdangerous==2.1.2
     # via flask
@@ -38,7 +38,7 @@ requests==2.31.0
     # via -r requirements.in
 six==1.16.0
     # via python-dateutil
-urllib3==2.0.7
+urllib3==2.1.0
     # via requests
 waitress==2.1.2
     # via -r requirements.in
