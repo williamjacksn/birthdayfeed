@@ -16,6 +16,7 @@ from typing import Type
 
 __version__ = '2022.2'
 __web_server_threads__ = int(os.getenv('WEB_SERVER_THREADS', 8))
+__scheme__ = os.getenv('SCHEME', 'https')
 
 app = flask.Flask(__name__)
 app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
@@ -106,6 +107,11 @@ def row_is_valid(row: list[str]) -> bool:
     return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
 
 
+@app.add_template_filter
+def external_url_for(endpoint, *args, **kwargs):
+    return flask.url_for(endpoint, _external=True, _scheme=__scheme__, *args, **kwargs)
+
+
 @app.before_request
 def before_request():
     flask.g.request_id = random.randbytes(4).hex()
@@ -164,7 +170,7 @@ def atom():
             update_date = next_birthday - notification_interval
             update_string = f'{update_date.isoformat()}T00:00:00Z'
             id_name = name.replace(' ', '-')
-            url = flask.url_for('index', _external=True)
+            url = external_url_for('index')
             id_s = f'{url}{id_name}/{next_birthday.year}'
             c['birthdays'].append({'title': t.description, 'updated': update_string, 'id': id_s})
 

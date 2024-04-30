@@ -5,15 +5,15 @@
     <title>birthdayfeed</title>
     <subtitle>Birthdays in a feed reader: think of the possibilities!</subtitle>
     <link rel="self" href="{{ request.url }}" />
-    <link href="{{ url_for('index', _external=True) }}" />
+    <link href="{{ external_url_for('index') }}" />
     <updated>{{ c.today_atom }}</updated>
-    <id>{{ url_for('index', _external=True) }}</id>
+    <id>{{ external_url_for('index') }}</id>
 
     <author>
         <name>{{ request.args.get('a', 'birthdayfeed') }}</name>
     </author>
-    <icon>{{ url_for('static', filename='birthdayfeed.png', _external=True) }}</icon>
-    <logo>{{ url_for('static', filename='birthday+feed.png', _external=True) }}</logo>
+    <icon>{{ external_url_for('static', filename='birthdayfeed.png') }}</icon>
+    <logo>{{ external_url_for('static', filename='birthday+feed.png') }}</logo>
 
     {% for birthday in c.birthdays %}
         <entry>
