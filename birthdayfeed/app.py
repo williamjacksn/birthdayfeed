@@ -107,7 +107,7 @@ def row_is_valid(row: list[str]) -> bool:
     return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
 
 
-@app.add_template_filter
+@app.template_global
 def external_url_for(endpoint, *args, **kwargs):
     return flask.url_for(endpoint, _external=True, _scheme=__scheme__, *args, **kwargs)
 
