@@ -107,11 +107,6 @@ def row_is_valid(row: list[str]) -> bool:
     return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
 
 
-@app.template_filter
-def external_url_for(endpoint, *args, **kwargs):
-    return flask.url_for(endpoint, _external=True, _scheme=__scheme__, *args, **kwargs)
-
-
 @app.before_request
 def before_request():
     flask.g.request_id = random.randbytes(4).hex()
@@ -138,6 +133,8 @@ def index():
 def atom():
     if 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
+
+    flask.g.index = flask.url_for('index', _external=True, _scheme=__scheme__)
     notification_days = int(flask.request.args.get('notification_days', '7'))
 
     lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
@@ -171,11 +168,9 @@ def atom():
             update_date = next_birthday - notification_interval
             update_string = f'{update_date.isoformat()}T00:00:00Z'
             id_name = name.replace(' ', '-')
-            url = external_url_for('index')
-            id_s = f'{url}{id_name}/{next_birthday.year}'
+            id_s = f'{flask.g.index}{id_name}/{next_birthday.year}'
             c['birthdays'].append({'title': t.description, 'updated': update_string, 'id': id_s})
 
-    flask.g.index = external_url_for('index')
     flask.g.scheme = __scheme__
     resp = flask.make_response(flask.render_template('birthdayfeed.atom', c=c))
     resp.mimetype = 'application/atom+xml'
