@@ -107,7 +107,7 @@ def row_is_valid(row: list[str]) -> bool:
     return row[1].isdigit() and row[2].isdigit() and row[3].isdigit()
 
 
-@app.template_global
+@app.template_filter
 def external_url_for(endpoint, *args, **kwargs):
     return flask.url_for(endpoint, _external=True, _scheme=__scheme__, *args, **kwargs)
 
@@ -130,6 +130,7 @@ def teardown_request(response):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    flask.g.scheme = __scheme__
     return flask.render_template('index.html')
 
 
@@ -174,6 +175,8 @@ def atom():
             id_s = f'{url}{id_name}/{next_birthday.year}'
             c['birthdays'].append({'title': t.description, 'updated': update_string, 'id': id_s})
 
+    flask.g.index = external_url_for('index')
+    flask.g.scheme = __scheme__
     resp = flask.make_response(flask.render_template('birthdayfeed.atom', c=c))
     resp.mimetype = 'application/atom+xml'
     return resp
