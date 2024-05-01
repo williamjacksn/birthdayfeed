@@ -30,6 +30,11 @@ def date_is_valid(year: int, month: int, day: int) -> bool:
     return True
 
 
+def decoded_response(response: requests.Response):
+    for line in response.iter_lines():
+        yield line.decode()
+
+
 def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
     """Given a `datetime.date` object representing a date of birth, return a list of `datetime.date` objects
     representing all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever
@@ -150,7 +155,7 @@ def atom():
     app.logger.info(f'{flask.g.request_id} - building atom: {data_location}')
     c['escaped_location'] = html.escape(data_location)
     response = requests.get(data_location, stream=True)
-    for row in csv.reader(response.iter_lines(decode_unicode=True)):
+    for row in csv.reader(decoded_response(response)):
         if not row_is_valid(row):
             continue
 
@@ -198,8 +203,7 @@ def ics():
         dtstamp = datetime.datetime.combine(today, datetime.time())
 
         response = requests.get(csv_url, stream=True)
-        response.encoding = response.apparent_encoding
-        for row in csv.reader(response.iter_lines(decode_unicode=True)):
+        for row in csv.reader(decoded_response(response)):
             if not row_is_valid(row):
                 continue
 
