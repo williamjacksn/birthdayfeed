@@ -37,3 +37,7 @@ code {
 table, td, th {
     border: 1px solid gray
 }
+
+.user-select-all {
+    user-select: all;
+}

@@ -34,7 +34,7 @@
         <div class="results">
             <p>
                 <strong>Feed reader URL:</strong>
-                <code>{{ url_for('atom', d=request.values.d, l=request.values.l, _external=true, _scheme=g.scheme) }}</code>
+                <code class="user-select-all">{{ url_for('atom', d=request.values.d, l=request.values.l, _external=true, _scheme=g.scheme) }}</code>
             </p>
             <p>
                 <a href="https://feedly.uservoice.com/knowledgebase/articles/187494-how-to-add-news-feeds-to-your-feedly">
@@ -43,7 +43,7 @@
             </p>
             <p>
                 <strong>Calendar URL:</strong>
-                <code>{{ url_for('ics', d=request.values.d, l=request.values.l, _external=true, _scheme=g.scheme) }}</code>
+                <code class="user-select-all">{{ url_for('ics', d=request.values.d, l=request.values.l, _external=true, _scheme=g.scheme) }}</code>
             </p>
             <p>
                 <a href="https://support.google.com/calendar/answer/37100">
