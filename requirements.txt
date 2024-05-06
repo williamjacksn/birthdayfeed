@@ -40,5 +40,5 @@ urllib3==2.2.1
     # via requests
 waitress==3.0.0
     # via -r requirements.in
-werkzeug==3.0.2
+werkzeug==3.0.3
     # via flask
