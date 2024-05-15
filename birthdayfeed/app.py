@@ -201,8 +201,7 @@ def ics():
             if not line.startswith(b'END:'):
                 yield line
 
-        today = datetime.date.today()
-        dtstamp = datetime.datetime.combine(today, datetime.time())
+        dtstamp = datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC)
 
         response = requests.get(csv_url, stream=True)
         for row in csv.reader(decoded_response(response)):
