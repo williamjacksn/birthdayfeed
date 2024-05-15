@@ -187,7 +187,9 @@ def ics():
     if 'icsd' not in flask.request.args and 'd' not in flask.request.args:
         return flask.redirect(flask.url_for('index'), 303)
 
-    def generate(csv_url: str, lang_class: Type[birthdayfeed.lang.DefaultTranslator]):
+    def generate(csv_url: str, lang_class: Type[birthdayfeed.lang.DefaultTranslator], cal_type: str = None):
+        if cal_type is None or cal_type not in ('next', 'full'):
+            cal_type = 'full'
         cal = icalendar.Calendar()
         cal.add('version', '2.0')
         cal.add('prodid', '-//birthdayfeed.subtlecoolness.com')
@@ -215,7 +217,11 @@ def ics():
             else:
                 continue
 
-            for next_birthday in get_all_birthdays(birthday):
+            if cal_type == 'full':
+                birthdays = get_all_birthdays(birthday)
+            else:
+                birthdays = [get_next_birthday(birthday)]
+            for next_birthday in birthdays:
                 t = lang_class(name, birthday, next_birthday)
                 event = icalendar.Event()
                 day_after = next_birthday + datetime.timedelta(days=1)
@@ -239,8 +245,9 @@ def ics():
     data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
     app.logger.info(f'{flask.g.request_id} -- building ics: {data_location}')
     _lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
+    _cal_type = flask.request.values.get('t', 'full')
 
-    resp = flask.make_response(flask.stream_with_context(generate(data_location, _lang_class)))
+    resp = flask.make_response(flask.stream_with_context(generate(data_location, _lang_class, _cal_type)))
     resp.mimetype = 'text/calendar'
     return resp
 
