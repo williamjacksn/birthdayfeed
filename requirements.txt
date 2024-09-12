@@ -36,7 +36,7 @@ requests==2.32.3
     # via -r requirements.in
 six==1.16.0
     # via python-dateutil
-urllib3==2.2.2
+urllib3==2.2.3
     # via requests
 waitress==3.0.0
     # via -r requirements.in
