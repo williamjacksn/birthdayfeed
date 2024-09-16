@@ -16,7 +16,7 @@ flask==3.0.3
     # via -r requirements.in
 icalendar==5.0.13
     # via -r requirements.in
-idna==3.8
+idna==3.10
     # via requests
 itsdangerous==2.2.0
     # via flask
