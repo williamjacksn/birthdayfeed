@@ -14,7 +14,7 @@ click==8.1.7
     # via flask
 flask==3.0.3
     # via -r requirements.in
-icalendar==5.0.13
+icalendar==6.0.0
     # via -r requirements.in
 idna==3.10
     # via requests
@@ -30,12 +30,12 @@ notch==2023.1
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via icalendar
-pytz==2024.2
-    # via icalendar
 requests==2.32.3
     # via -r requirements.in
 six==1.16.0
     # via python-dateutil
+tzdata==2024.2
+    # via icalendar
 urllib3==2.2.3
     # via requests
 waitress==3.0.0
