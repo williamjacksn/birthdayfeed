@@ -14,7 +14,7 @@ click==8.1.7
     # via flask
 flask==3.0.3
     # via -r requirements.in
-icalendar==6.0.0
+icalendar==6.0.1
     # via -r requirements.in
 idna==3.10
     # via requests
