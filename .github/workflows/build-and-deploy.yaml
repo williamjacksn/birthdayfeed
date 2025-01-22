@@ -1,4 +1,4 @@
-name: Build the container image
+name: Build and deploy app
 
 on:
   pull_request:
@@ -7,13 +7,6 @@ on:
   push:
     branches:
       - master
-  release:
-    types:
-      - published
-  workflow_dispatch:
-
-env:
-  image_name: ghcr.io/${{ github.repository }}
 
 jobs:
   build:
@@ -27,7 +20,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub container registry
-        if: github.event_name == 'push' || github.event_name == 'release'
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -49,10 +42,21 @@ jobs:
           push: true
           tags: ${{ env.image_name }}:latest
 
-      - name: Tag and push release image to registry
-        if: github.event_name == 'release'
-        uses: docker/build-push-action@v6
-        with:
-          cache-from: type=gha
-          push: true
-          tags: ${{ env.image_name }}:latest,${{ env.image_name }}:${{ github.event.release.tag_name }}
+  deploy:
+    needs:
+      - build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Configure SSH key
+        run: |
+          install --mode=600 -D /dev/null ~/.ssh/id_ed25519
+          echo "${{ secrets.ssh_private_key }}" > ~/.ssh/id_ed25519
+          ssh-keyscan -H -p 52185 ${{ secrets.ssh_host }} > ~/.ssh/known_hosts
+
+      - name: Pull latest container image
+        run: ssh ssh://${{ secrets.ssh_user }}@${{ secrets.ssh_host }}:52185 /usr/bin/docker compose --file /home/${{ secrets.ssh_user }}/syncthing/coruscant/compose.yaml pull birthdayfeed
+
+      - name: Restart app
+        run: ssh ssh://${{ secrets.ssh_user }}@${{ secrets.ssh_host }}:52185 /usr/bin/docker compose --file /home/${{ secrets.ssh_user }}/syncthing/coruscant/compose.yaml up --detach birthdayfeed
