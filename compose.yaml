@@ -7,13 +7,6 @@ services:
     volumes:
       - ./:/home/python/birthdayfeed
 
-  fly:
-    image: flyio/flyctl
-    init: true
-    volumes:
-      - ./:/project
-    working_dir: /project
-
   shell:
     entrypoint:
       - /bin/bash
