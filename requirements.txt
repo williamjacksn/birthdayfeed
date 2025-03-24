@@ -34,7 +34,7 @@ requests==2.32.3
     # via -r requirements.in
 six==1.17.0
     # via python-dateutil
-tzdata==2025.1
+tzdata==2025.2
     # via icalendar
 urllib3==2.3.0
     # via requests
