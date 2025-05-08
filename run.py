@@ -3,7 +3,7 @@ import notch
 import signal
 import sys
 
-log = notch.make_log('birthdayfeed.run')
+notch.configure()
 
 def handle_sigterm(_signal, _frame):
     sys.exit()
