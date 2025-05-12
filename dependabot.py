@@ -5,7 +5,6 @@ eco = "package-ecosystem"
 daily = {"interval": "daily"}
 
 data = {
-    "#generator": "dependabot.py",
     "version": 2,
     "enable-beta-ecosystems": True,
     "updates": [
