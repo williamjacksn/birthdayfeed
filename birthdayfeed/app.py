@@ -14,12 +14,14 @@ import werkzeug.middleware.proxy_fix
 
 from typing import Type
 
-__version__ = '2022.2'
-__web_server_threads__ = int(os.getenv('WEB_SERVER_THREADS', 8))
-__scheme__ = os.getenv('SCHEME', 'https')
+__version__ = "2022.2"
+__web_server_threads__ = int(os.getenv("WEB_SERVER_THREADS", 8))
+__scheme__ = os.getenv("SCHEME", "https")
 
 app = flask.Flask(__name__)
-app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_port=1)
+app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_port=1
+)
 
 
 def date_is_valid(year: int, month: int, day: int) -> bool:
@@ -62,11 +64,11 @@ def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
 
 def get_lang_class(key: str) -> Type[birthdayfeed.lang.DefaultTranslator]:
     lang_class_map = {
-        'en-an': birthdayfeed.lang.EnglishAnniversaryTranslator,
-        'en-bd': birthdayfeed.lang.EnglishBirthdayTranslator,
+        "en-an": birthdayfeed.lang.EnglishAnniversaryTranslator,
+        "en-bd": birthdayfeed.lang.EnglishBirthdayTranslator,
     }
     lang_class = lang_class_map.get(key, birthdayfeed.lang.EnglishBirthdayTranslator)
-    app.logger.debug(f'Translation class is {lang_class}')
+    app.logger.debug(f"Translation class is {lang_class}")
     return lang_class
 
 
@@ -116,44 +118,44 @@ def row_is_valid(row: list[str]) -> bool:
 def before_request():
     flask.g.request_id = random.randbytes(4).hex()
     usage = resource.getrusage(resource.RUSAGE_SELF)
-    app.logger.info(f'{flask.g.request_id} - before maxrss: {usage.ru_maxrss}')
-    user_agent = flask.request.headers.get('user-agent')
-    app.logger.info(f'{flask.g.request_id} ---- user-agent: {user_agent}')
+    app.logger.info(f"{flask.g.request_id} - before maxrss: {usage.ru_maxrss}")
+    user_agent = flask.request.headers.get("user-agent")
+    app.logger.info(f"{flask.g.request_id} ---- user-agent: {user_agent}")
 
 
 @app.teardown_request
 def teardown_request(response):
     usage = resource.getrusage(resource.RUSAGE_SELF)
-    app.logger.info(f'{flask.g.request_id} teardown maxrss: {usage.ru_maxrss}')
+    app.logger.info(f"{flask.g.request_id} teardown maxrss: {usage.ru_maxrss}")
     return response
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
     flask.g.scheme = __scheme__
-    return flask.render_template('index.html')
+    return flask.render_template("index.html")
 
 
-@app.route('/birthdayfeed.atom')
+@app.route("/birthdayfeed.atom")
 def atom():
-    if 'd' not in flask.request.args:
-        return flask.redirect(flask.url_for('index'), 303)
+    if "d" not in flask.request.args:
+        return flask.redirect(flask.url_for("index"), 303)
 
-    flask.g.index = flask.url_for('index', _external=True, _scheme=__scheme__)
-    notification_days = int(flask.request.args.get('notification_days', '7'))
+    flask.g.index = flask.url_for("index", _external=True, _scheme=__scheme__)
+    notification_days = int(flask.request.args.get("notification_days", "7"))
 
-    lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
+    lang_class = get_lang_class(flask.request.args.get("l", "en-bd"))
 
     c = {}
 
     today = datetime.date.today()
-    c['today_atom'] = f'{today.isoformat()}T00:00:00Z'
+    c["today_atom"] = f"{today.isoformat()}T00:00:00Z"
 
-    c['birthdays'] = []
+    c["birthdays"] = []
     notification_interval = datetime.timedelta(days=notification_days)
-    data_location = flask.request.args.get('d')
-    app.logger.info(f'{flask.g.request_id} - building atom: {data_location}')
-    c['escaped_location'] = html.escape(data_location)
+    data_location = flask.request.args.get("d")
+    app.logger.info(f"{flask.g.request_id} - building atom: {data_location}")
+    c["escaped_location"] = html.escape(data_location)
     response = requests.get(data_location, stream=True)
     for row in csv.reader(decoded_response(response)):
         if not row_is_valid(row):
@@ -171,34 +173,42 @@ def atom():
         if next_birthday - today <= notification_interval:
             t = lang_class(name, birthday, next_birthday)
             update_date = next_birthday - notification_interval
-            update_string = f'{update_date.isoformat()}T00:00:00Z'
-            id_name = name.replace(' ', '-')
-            id_s = f'{flask.g.index}{id_name}/{next_birthday.year}'
-            c['birthdays'].append({'title': t.description, 'updated': update_string, 'id': id_s})
+            update_string = f"{update_date.isoformat()}T00:00:00Z"
+            id_name = name.replace(" ", "-")
+            id_s = f"{flask.g.index}{id_name}/{next_birthday.year}"
+            c["birthdays"].append(
+                {"title": t.description, "updated": update_string, "id": id_s}
+            )
 
     flask.g.scheme = __scheme__
-    resp = flask.make_response(flask.render_template('birthdayfeed.atom', c=c))
-    resp.mimetype = 'application/atom+xml'
+    resp = flask.make_response(flask.render_template("birthdayfeed.atom", c=c))
+    resp.mimetype = "application/atom+xml"
     return resp
 
 
-@app.route('/birthdayfeed.ics')
+@app.route("/birthdayfeed.ics")
 def ics():
-    if 'icsd' not in flask.request.args and 'd' not in flask.request.args:
-        return flask.redirect(flask.url_for('index'), 303)
+    if "icsd" not in flask.request.args and "d" not in flask.request.args:
+        return flask.redirect(flask.url_for("index"), 303)
 
-    def generate(csv_url: str, lang_class: Type[birthdayfeed.lang.DefaultTranslator], cal_type: str = None):
-        if cal_type is None or cal_type not in ('next', 'full'):
-            cal_type = 'full'
+    def generate(
+        csv_url: str,
+        lang_class: Type[birthdayfeed.lang.DefaultTranslator],
+        cal_type: str = None,
+    ):
+        if cal_type is None or cal_type not in ("next", "full"):
+            cal_type = "full"
         cal = icalendar.Calendar()
-        cal.add('version', '2.0')
-        cal.add('prodid', '-//birthdayfeed.subtlecoolness.com')
-        cal.add('calscale', 'GREGORIAN')
-        cal.add('x-wr-calname', 'birthdayfeed')
-        cal.add('x-wr-timezone', 'UTC')
-        cal.add('x-wr-caldesc', f'Birthday calendar provided by {flask.request.host_url}')
+        cal.add("version", "2.0")
+        cal.add("prodid", "-//birthdayfeed.subtlecoolness.com")
+        cal.add("calscale", "GREGORIAN")
+        cal.add("x-wr-calname", "birthdayfeed")
+        cal.add("x-wr-timezone", "UTC")
+        cal.add(
+            "x-wr-caldesc", f"Birthday calendar provided by {flask.request.host_url}"
+        )
         for line in cal.to_ical().splitlines(keepends=True):
-            if not line.startswith(b'END:'):
+            if not line.startswith(b"END:"):
                 yield line
 
         dtstamp = datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC)
@@ -216,7 +226,7 @@ def ics():
             else:
                 continue
 
-            if cal_type == 'full':
+            if cal_type == "full":
                 birthdays = get_all_birthdays(birthday)
             else:
                 birthdays = [get_next_birthday(birthday)]
@@ -224,38 +234,42 @@ def ics():
                 t = lang_class(name, birthday, next_birthday)
                 event = icalendar.Event()
                 day_after = next_birthday + datetime.timedelta(days=1)
-                uid_name = name.replace(' ', '')
-                uid = f'{uid_name}{next_birthday.year}'
-                event.add('summary', t.summary)
-                event.add('dtstart', next_birthday)
-                event.add('dtend', day_after)
-                event.add('dtstamp', dtstamp)
-                event.add('uid', f'{uid}@{flask.request.host}')
-                event.add('created', dtstamp)
-                event.add('description', t.description)
-                event.add('last-modified', dtstamp)
-                event.add('transp', 'TRANSPARENT')
+                uid_name = name.replace(" ", "")
+                uid = f"{uid_name}{next_birthday.year}"
+                event.add("summary", t.summary)
+                event.add("dtstart", next_birthday)
+                event.add("dtend", day_after)
+                event.add("dtstamp", dtstamp)
+                event.add("uid", f"{uid}@{flask.request.host}")
+                event.add("created", dtstamp)
+                event.add("description", t.description)
+                event.add("last-modified", dtstamp)
+                event.add("transp", "TRANSPARENT")
                 yield event.to_ical()
 
         for line in cal.to_ical().splitlines(keepends=True):
-            if line.startswith(b'END:'):
+            if line.startswith(b"END:"):
                 yield line
 
-    data_location = flask.request.args.get('icsd', flask.request.args.get('d'))
-    app.logger.info(f'{flask.g.request_id} -- building ics: {data_location}')
-    _lang_class = get_lang_class(flask.request.args.get('l', 'en-bd'))
-    _cal_type = flask.request.values.get('t', 'full')
+    data_location = flask.request.args.get("icsd", flask.request.args.get("d"))
+    app.logger.info(f"{flask.g.request_id} -- building ics: {data_location}")
+    _lang_class = get_lang_class(flask.request.args.get("l", "en-bd"))
+    _cal_type = flask.request.values.get("t", "full")
 
-    resp = flask.make_response(flask.stream_with_context(generate(data_location, _lang_class, _cal_type)))
-    resp.mimetype = 'text/calendar'
+    resp = flask.make_response(
+        flask.stream_with_context(generate(data_location, _lang_class, _cal_type))
+    )
+    resp.mimetype = "text/calendar"
     return resp
 
 
-@app.route('/favicon.ico')
+@app.route("/favicon.ico")
 def favicon():
-    return flask.send_from_directory(os.path.join(app.root_path, 'static'), 'birthdayfeed.png')
+    return flask.send_from_directory(
+        os.path.join(app.root_path, "static"), "birthdayfeed.png"
+    )
 
 
 def main():
-    app.logger.info(f'birthdayfeed {__version__}')
+    app.logger.info(f"birthdayfeed {__version__}")
     waitress.serve(app, threads=__web_server_threads__)

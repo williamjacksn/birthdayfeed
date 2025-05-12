@@ -5,6 +5,7 @@ import sys
 
 notch.configure()
 
+
 def handle_sigterm(_signal, _frame):
     sys.exit()
 
