@@ -1,0 +1,13 @@
+[project]
+name = "birthdayfeed"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1.0",
+    "icalendar>=6.2.0",
+    "notch>=2025.2",
+    "requests>=2.32.3",
+    "waitress>=3.0.2",
+]
