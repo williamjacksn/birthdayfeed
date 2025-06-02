@@ -14,7 +14,7 @@ import werkzeug.middleware.proxy_fix
 
 from typing import Type
 
-__version__ = "2022.2"
+__version__ = "2025.0"
 __web_server_threads__ = int(os.getenv("WEB_SERVER_THREADS", 8))
 __scheme__ = os.getenv("SCHEME", "https")
 
