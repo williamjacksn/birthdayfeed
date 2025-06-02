@@ -6,7 +6,6 @@ daily = {"interval": "daily"}
 
 data = {
     "version": 2,
-    "enable-beta-ecosystems": True,
     "updates": [
         {eco: "docker", "directory": "/", "schedule": daily},
         {eco: "github-actions", "directory": "/", "schedule": daily},

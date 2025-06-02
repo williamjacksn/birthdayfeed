@@ -5,7 +5,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./:/home/python/birthdayfeed
+      - ./:/app
 
   shell:
     entrypoint:
@@ -13,5 +13,4 @@ services:
     image: ghcr.io/williamjacksn/birthdayfeed
     init: true
     volumes:
-      - ./:/home/python/birthdayfeed
-    working_dir: /home/python/birthdayfeed
+      - ./:/app
