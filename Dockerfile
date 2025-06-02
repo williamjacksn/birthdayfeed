@@ -18,4 +18,4 @@ LABEL org.opencontainers.image.authors="William Jackson <william@subtlecoolness.
 COPY --chown=python:python run.py ./
 COPY --chown=python:python birthdayfeed ./birthdayfeed
 
-ENTRYPOINT ["/bin/uv", "run", "run.py"]
+ENTRYPOINT ["/usr/local/bin/uv", "run", "run.py"]
