@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.7.9-bookworm-slim
+FROM ghcr.io/astral-sh/uv:0.7.10-bookworm-slim
 
 RUN /usr/sbin/useradd --create-home --shell /bin/bash --user-group python
 USER python
