@@ -35,7 +35,7 @@ build_and_deploy = {
                 },
                 {
                     "name": "Log in to GitHub container registry",
-                    "if": "github.even_name == 'push' || github.event_name == 'workflow_dispatch'",
+                    "if": "github.event_name == 'push' || github.event_name == 'workflow_dispatch'",
                     "uses": "docker/login-action@v3",
                     "with": {
                         "password": "${{ github.token }}",
@@ -45,7 +45,7 @@ build_and_deploy = {
                 },
                 {
                     "name": "Push latest image to registry",
-                    "if": "github.even_name == 'push' || github.event_name == 'workflow_dispatch'",
+                    "if": "github.event_name == 'push' || github.event_name == 'workflow_dispatch'",
                     "uses": "docker/build-push-action@v6",
                     "with": {
                         "cache-from": "type=gha",
