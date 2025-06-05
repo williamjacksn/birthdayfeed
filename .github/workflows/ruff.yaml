@@ -1,0 +1,47 @@
+{
+  "env": {
+    "_workflow_file_generator": "ci/gen-github-workflows.py"
+  },
+  "jobs": {
+    "ruff": {
+      "name": "Run ruff linting and formatting checks",
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "name": "Check out repository",
+          "uses": "actions/checkout@v4"
+        },
+        {
+          "name": "Run ruff check",
+          "uses": "astral-sh/ruff-action@v3",
+          "with": {
+            "args": "check --output-format=github"
+          }
+        },
+        {
+          "name": "Run ruff format",
+          "uses": "astral-sh/ruff-action@v3",
+          "with": {
+            "args": "format --check"
+          }
+        }
+      ]
+    }
+  },
+  "name": "Ruff",
+  "on": {
+    "pull_request": {
+      "branches": [
+        "master"
+      ]
+    },
+    "push": {
+      "branches": [
+        "master"
+      ]
+    }
+  },
+  "permissions": {
+    "contents": "read"
+  }
+}
