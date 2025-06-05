@@ -1,6 +1,11 @@
 {
   "updates": [
     {
+      "allow": [
+        {
+          "dependency-type": "all"
+        }
+      ],
       "directory": "/",
       "package-ecosystem": "docker",
       "schedule": {
@@ -8,6 +13,11 @@
       }
     },
     {
+      "allow": [
+        {
+          "dependency-type": "all"
+        }
+      ],
       "directory": "/",
       "package-ecosystem": "github-actions",
       "schedule": {
