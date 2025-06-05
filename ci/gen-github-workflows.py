@@ -58,7 +58,7 @@ build_and_deploy = {
         "deploy": {
             "name": "Deploy the app",
             "needs": "build",
-            "if": "github.even_name == 'push' || github.event_name == 'workflow_dispatch'",
+            "if": "github.event_name == 'push' || github.event_name == 'workflow_dispatch'",
             "runs-on": "ubuntu-latest",
             "steps": [
                 {"name": "Check out the repository", "uses": "actions/checkout@v4"},
