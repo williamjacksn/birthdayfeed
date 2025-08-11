@@ -4,7 +4,7 @@ import pathlib
 THIS_FILE = pathlib.PurePosixPath(
     pathlib.Path(__file__).relative_to(pathlib.Path().resolve())
 )
-
+CONTAINER_IMAGE = "ghcr.io/williamjacksn/birthdayfeed"
 ACTIONS_CHECKOUT = {"name": "Check out repository", "uses": "actions/checkout@v5"}
 
 
@@ -13,6 +13,27 @@ def gen(content: dict, target: str):
     pathlib.Path(target).write_text(
         json.dumps(content, indent=2, sort_keys=True), newline="\n"
     )
+
+
+def gen_compose():
+    target = "compose.yaml"
+    content = {
+        "services": {
+            "app": {
+                "image": CONTAINER_IMAGE,
+                "init": True,
+                "ports": ["8080:8080"],
+                "volumes": ["./:/app"],
+            },
+            "shell": {
+                "entrypoint": ["/bin/bash"],
+                "image": CONTAINER_IMAGE,
+                "init": True,
+                "volumes": ["./:/app"],
+            },
+        }
+    }
+    gen(content, target)
 
 
 def gen_dependabot(target: str):
@@ -45,7 +66,6 @@ def gen_deploy_workflow():
         "permissions": {},
         "env": {
             "description": f"This workflow ({target}) was generated from {THIS_FILE}",
-            "image_name": "ghcr.io/${{ github.repository }}",
         },
         "jobs": {
             "build": {
@@ -63,7 +83,7 @@ def gen_deploy_workflow():
                         "with": {
                             "cache-from": "type=gha",
                             "cache-to": "type=gha,mode=max",
-                            "tags": "${{ env.image_name }}:latest",
+                            "tags": f"{CONTAINER_IMAGE}:latest",
                         },
                     },
                     {
@@ -83,7 +103,7 @@ def gen_deploy_workflow():
                         "with": {
                             "cache-from": "type=gha",
                             "push": True,
-                            "tags": "${{ env.image_name }}:latest",
+                            "tags": f"{CONTAINER_IMAGE}:latest",
                         },
                     },
                 ],
@@ -147,6 +167,7 @@ def gen_ruff_workflow():
 
 
 def main():
+    gen_compose()
     gen_dependabot(".github/dependabot.yaml")
     gen_deploy_workflow()
     gen_ruff_workflow()

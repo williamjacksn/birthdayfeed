@@ -1,7 +1,6 @@
 {
   "env": {
-    "description": "This workflow (.github/workflows/build-and-deploy.yaml) was generated from ci/gen.py",
-    "image_name": "ghcr.io/${{ github.repository }}"
+    "description": "This workflow (.github/workflows/build-and-deploy.yaml) was generated from ci/gen.py"
   },
   "jobs": {
     "build": {
@@ -21,7 +20,7 @@
           "with": {
             "cache-from": "type=gha",
             "cache-to": "type=gha,mode=max",
-            "tags": "${{ env.image_name }}:latest"
+            "tags": "ghcr.io/williamjacksn/birthdayfeed:latest"
           }
         },
         {
@@ -41,7 +40,7 @@
           "with": {
             "cache-from": "type=gha",
             "push": true,
-            "tags": "${{ env.image_name }}:latest"
+            "tags": "ghcr.io/williamjacksn/birthdayfeed:latest"
           }
         }
       ]
