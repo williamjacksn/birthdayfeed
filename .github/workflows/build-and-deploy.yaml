@@ -1,6 +1,6 @@
 {
   "env": {
-    "_workflow_file_generator": "ci/gen-github-workflows.py",
+    "description": "This workflow (.github/workflows/build-and-deploy.yaml) was generated from ci/gen.py",
     "image_name": "ghcr.io/${{ github.repository }}"
   },
   "jobs": {
@@ -53,8 +53,8 @@
       "runs-on": "ubuntu-latest",
       "steps": [
         {
-          "name": "Check out the repository",
-          "uses": "actions/checkout@v4"
+          "name": "Check out repository",
+          "uses": "actions/checkout@v5"
         },
         {
           "env": {
