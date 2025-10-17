@@ -42,7 +42,7 @@ def gen_dependabot(target: str):
             "package-ecosystem": ecosystem,
             "allow": [{"dependency-type": "all"}],
             "directory": "/",
-            "schedule": {"interval": "daily"},
+            "schedule": {"interval": "weekly"},
         }
 
     ecosystems = ["docker", "github-actions", "uv"]
