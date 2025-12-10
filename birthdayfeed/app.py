@@ -5,6 +5,7 @@ import html
 import os
 import resource
 import secrets
+import sys
 from collections.abc import Iterator
 
 import flask
@@ -20,7 +21,7 @@ __web_server_threads__ = int(os.getenv("WEB_SERVER_THREADS", 8))
 __scheme__ = os.getenv("SCHEME", "https")
 
 app = flask.Flask(__name__)
-app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(
+app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(  # ty:ignore[invalid-assignment]
     app.wsgi_app, x_for=1, x_proto=1, x_port=1
 )
 
@@ -120,17 +121,18 @@ def row_is_valid(row: list[str]) -> bool:
 @app.before_request
 def before_request() -> None:
     flask.g.request_id = secrets.token_hex(4)
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    app.logger.info(f"{flask.g.request_id} - before maxrss: {usage.ru_maxrss}")
+    if sys.platform != "win32":
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        app.logger.info(f"{flask.g.request_id} - before maxrss: {usage.ru_maxrss}")
     user_agent = flask.request.headers.get("user-agent")
     app.logger.info(f"{flask.g.request_id} ---- user-agent: {user_agent}")
 
 
 @app.teardown_request
-def teardown_request(response: flask.Response) -> flask.Response:
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    app.logger.info(f"{flask.g.request_id} teardown maxrss: {usage.ru_maxrss}")
-    return response
+def teardown_request(x: BaseException | None) -> None:
+    if sys.platform != "win32":
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        app.logger.info(f"{flask.g.request_id} teardown maxrss: {usage.ru_maxrss}")
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -140,7 +142,7 @@ def index() -> str:
 
 
 @app.route("/birthdayfeed.atom")
-def atom() -> flask.Response:
+def atom() -> werkzeug.Response:
     if "d" not in flask.request.args:
         return flask.redirect(flask.url_for("index"), 303)
 
@@ -190,7 +192,7 @@ def atom() -> flask.Response:
 
 
 @app.route("/birthdayfeed.ics")
-def ics() -> flask.Response:
+def ics() -> werkzeug.Response:
     if "icsd" not in flask.request.args and "d" not in flask.request.args:
         return flask.redirect(flask.url_for("index"), 303)
 
