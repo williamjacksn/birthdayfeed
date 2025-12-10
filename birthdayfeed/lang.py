@@ -12,7 +12,7 @@ def ordinal(n: int) -> str:
 
 
 class DefaultTranslator:
-    def __init__(self, name: str, origin: datetime.date, target: datetime.date):
+    def __init__(self, name: str, origin: datetime.date, target: datetime.date) -> None:
         self.name = name
         self.origin = origin
         self.target = target
@@ -58,7 +58,10 @@ class EnglishBirthdayTranslator(DefaultTranslator):
         elif self.age == 0:
             return f"{self.name} was born on {self.target_full}"
         else:
-            return f"{self.name}, born {self.origin_full}, will turn {self.age} on {self.target_full}"
+            return (
+                f"{self.name}, born {self.origin_full}, "
+                f"will turn {self.age} on {self.target_full}"
+            )
 
 
 class EnglishAnniversaryTranslator(DefaultTranslator):
@@ -83,5 +86,6 @@ class EnglishAnniversaryTranslator(DefaultTranslator):
         else:
             return (
                 f"{self.name}, married on {self.origin_full}, "
-                f"will celebrate their {ordinal(self.age)} anniversary on {self.target_full}"
+                f"will celebrate their {ordinal(self.age)} anniversary "
+                f"on {self.target_full}"
             )

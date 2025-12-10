@@ -1,18 +1,19 @@
-import birthdayfeed.lang
 import calendar
 import csv
 import datetime
-import flask
 import html
-import icalendar
 import os
-import random
-import requests
 import resource
+import secrets
+from collections.abc import Iterator
+
+import flask
+import icalendar
+import requests
 import waitress
 import werkzeug.middleware.proxy_fix
 
-from typing import Type
+import birthdayfeed.lang
 
 __version__ = "2025.0"
 __web_server_threads__ = int(os.getenv("WEB_SERVER_THREADS", 8))
@@ -32,15 +33,16 @@ def date_is_valid(year: int, month: int, day: int) -> bool:
     return True
 
 
-def decoded_response(response: requests.Response):
+def decoded_response(response: requests.Response) -> Iterator[str]:
+    line: bytes
     for line in response.iter_lines():
         yield line.decode()
 
 
 def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
-    """Given a `datetime.date` object representing a date of birth, return a list of `datetime.date` objects
-    representing all birthdays from birth to the next birthday from today or 85 years after the date of birth, whichever
-    is greater."""
+    """Given a `datetime.date` object representing a date of birth, return a list of
+    `datetime.date` objects representing all birthdays from birth to the next birthday
+    from today or 85 years after the date of birth, whichever is greater."""
 
     if origin.year == 1:
         return [get_next_birthday(origin)]
@@ -62,7 +64,7 @@ def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
     return birthdays
 
 
-def get_lang_class(key: str) -> Type[birthdayfeed.lang.DefaultTranslator]:
+def get_lang_class(key: str) -> type[birthdayfeed.lang.DefaultTranslator]:
     lang_class_map = {
         "en-an": birthdayfeed.lang.EnglishAnniversaryTranslator,
         "en-bd": birthdayfeed.lang.EnglishBirthdayTranslator,
@@ -73,10 +75,11 @@ def get_lang_class(key: str) -> Type[birthdayfeed.lang.DefaultTranslator]:
 
 
 def get_next_birthday(bd: datetime.date) -> datetime.date:
-    """Given a `datetime.date` object representing a date of birth, return a `datetime.date` object representing the
-    next time this birthday will be celebrated."""
+    """Given a `datetime.date` object representing a date of birth, return a
+    `datetime.date` object representing the next time this birthday will be
+    celebrated."""
 
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    now = datetime.datetime.now(tz=datetime.UTC)
     today = now.date()
     this_year = today.year
     next_year = today.year + 1
@@ -115,8 +118,8 @@ def row_is_valid(row: list[str]) -> bool:
 
 
 @app.before_request
-def before_request():
-    flask.g.request_id = random.randbytes(4).hex()
+def before_request() -> None:
+    flask.g.request_id = secrets.token_hex(4)
     usage = resource.getrusage(resource.RUSAGE_SELF)
     app.logger.info(f"{flask.g.request_id} - before maxrss: {usage.ru_maxrss}")
     user_agent = flask.request.headers.get("user-agent")
@@ -124,20 +127,20 @@ def before_request():
 
 
 @app.teardown_request
-def teardown_request(response):
+def teardown_request(response: flask.Response) -> flask.Response:
     usage = resource.getrusage(resource.RUSAGE_SELF)
     app.logger.info(f"{flask.g.request_id} teardown maxrss: {usage.ru_maxrss}")
     return response
 
 
 @app.route("/", methods=["GET", "POST"])
-def index():
+def index() -> str:
     flask.g.scheme = __scheme__
     return flask.render_template("index.html")
 
 
 @app.route("/birthdayfeed.atom")
-def atom():
+def atom() -> flask.Response:
     if "d" not in flask.request.args:
         return flask.redirect(flask.url_for("index"), 303)
 
@@ -156,7 +159,7 @@ def atom():
     data_location = flask.request.args.get("d")
     app.logger.info(f"{flask.g.request_id} - building atom: {data_location}")
     c["escaped_location"] = html.escape(data_location)
-    response = requests.get(data_location, stream=True)
+    response = requests.get(data_location, stream=True, timeout=10)
     for row in csv.reader(decoded_response(response)):
         if not row_is_valid(row):
             continue
@@ -187,16 +190,16 @@ def atom():
 
 
 @app.route("/birthdayfeed.ics")
-def ics():
+def ics() -> flask.Response:
     if "icsd" not in flask.request.args and "d" not in flask.request.args:
         return flask.redirect(flask.url_for("index"), 303)
 
     def generate(
         csv_url: str,
-        lang_class: Type[birthdayfeed.lang.DefaultTranslator],
-        cal_type: str = None,
-    ):
-        if cal_type is None or cal_type not in ("next", "full"):
+        lang_class: type[birthdayfeed.lang.DefaultTranslator],
+        cal_type: str = "full",
+    ) -> Iterator[bytes]:
+        if cal_type not in ("next", "full"):
             cal_type = "full"
         cal = icalendar.Calendar()
         cal.add("version", "2.0")
@@ -213,7 +216,7 @@ def ics():
 
         dtstamp = datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC)
 
-        response = requests.get(csv_url, stream=True)
+        response = requests.get(csv_url, stream=True, timeout=10)
         for row in csv.reader(decoded_response(response)):
             if not row_is_valid(row):
                 continue
@@ -264,12 +267,12 @@ def ics():
 
 
 @app.route("/favicon.ico")
-def favicon():
+def favicon() -> flask.Response:
     return flask.send_from_directory(
         os.path.join(app.root_path, "static"), "birthdayfeed.png"
     )
 
 
-def main():
+def main() -> None:
     app.logger.info(f"birthdayfeed {__version__}")
     waitress.serve(app, threads=__web_server_threads__)

@@ -1,12 +1,15 @@
-import birthdayfeed.app
-import notch
 import signal
 import sys
+import types
+
+import notch
+
+import birthdayfeed.app
 
 notch.configure()
 
 
-def handle_sigterm(_signal, _frame):
+def handle_sigterm(_signal: int, _frame: types.FrameType | None) -> None:
     sys.exit()
 
 
