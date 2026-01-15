@@ -7,7 +7,8 @@ WORKDIR /app
 COPY --chown=python:python .python-version pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
-ENV PATH="/app/.venv/bin:${PATH}" \
+ENV APP_NAME="birthdayfeed" \
+    PATH="/app/.venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE="1" \
     PYTHONUNBUFFERED="1" \
     TZ="Etc/UTC"
