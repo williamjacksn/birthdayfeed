@@ -8,7 +8,7 @@ dependencies = [
     "flask>=3.1.2",
     "icalendar>=7.1.0",
     "notch>=2026.0",
-    "requests>=2.34.1",
+    "requests>=2.34.2",
     "waitress>=3.0.2",
 ]
 
