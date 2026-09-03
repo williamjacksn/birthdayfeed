@@ -17,7 +17,7 @@ import werkzeug.middleware.proxy_fix
 import birthdayfeed.lang
 
 __version__ = "2025.0"
-__web_server_threads__ = int(os.getenv("WEB_SERVER_THREADS", 8))
+__web_server_threads__ = int(os.getenv("WEB_SERVER_THREADS", "8"))
 __scheme__ = os.getenv("SCHEME", "https")
 
 app = flask.Flask(__name__)
@@ -49,7 +49,7 @@ def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
         return [get_next_birthday(origin)]
 
     birthdays = [origin]
-    today = datetime.date.today()
+    today = datetime.datetime.now(tz=datetime.UTC).date()
     next_year = today.year + 1
 
     offset = 0
@@ -153,7 +153,7 @@ def atom() -> werkzeug.Response:
 
     c = {}
 
-    today = datetime.date.today()
+    today = datetime.datetime.now(tz=datetime.UTC).date()
     c["today_atom"] = f"{today.isoformat()}T00:00:00Z"
 
     c["birthdays"] = []
