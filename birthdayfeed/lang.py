@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 
 def ordinal(n: int) -> str:
@@ -12,7 +12,7 @@ def ordinal(n: int) -> str:
 
 
 class DefaultTranslator:
-    def __init__(self, name: str, origin: datetime.date, target: datetime.date) -> None:
+    def __init__(self, name: str, origin: dt.date, target: dt.date) -> None:
         self.name = name
         self.origin = origin
         self.target = target

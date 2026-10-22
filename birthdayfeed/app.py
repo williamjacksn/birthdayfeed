@@ -1,6 +1,6 @@
 import calendar
 import csv
-import datetime
+import datetime as dt
 import html
 import os
 import resource
@@ -28,7 +28,7 @@ app.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(  # ty:ignore[invalid-assi
 
 def date_is_valid(year: int, month: int, day: int) -> bool:
     try:
-        datetime.date(year, month, day)
+        dt.date(year, month, day)
     except ValueError:
         return False
     return True
@@ -40,7 +40,7 @@ def decoded_response(response: requests.Response) -> Iterator[str]:
         yield line.decode()
 
 
-def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
+def get_all_birthdays(origin: dt.date) -> list[dt.date]:
     """Given a `datetime.date` object representing a date of birth, return a list of
     `datetime.date` objects representing all birthdays from birth to the next birthday
     from today or 85 years after the date of birth, whichever is greater."""
@@ -49,7 +49,7 @@ def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
         return [get_next_birthday(origin)]
 
     birthdays = [origin]
-    today = datetime.datetime.now(tz=datetime.UTC).date()
+    today = dt.datetime.now(tz=dt.UTC).date()
     next_year = today.year + 1
 
     offset = 0
@@ -59,7 +59,7 @@ def get_all_birthdays(origin: datetime.date) -> list[datetime.date]:
         try:
             this_bd = origin.replace(year=origin.year + offset)
         except ValueError:
-            this_bd = datetime.date(origin.year + offset, 3, 1)
+            this_bd = dt.date(origin.year + offset, 3, 1)
         birthdays.append(this_bd)
 
     return birthdays
@@ -75,18 +75,18 @@ def get_lang_class(key: str) -> type[birthdayfeed.lang.DefaultTranslator]:
     return lang_class
 
 
-def get_next_birthday(bd: datetime.date) -> datetime.date:
+def get_next_birthday(bd: dt.date) -> dt.date:
     """Given a `datetime.date` object representing a date of birth, return a
     `datetime.date` object representing the next time this birthday will be
     celebrated."""
 
-    now = datetime.datetime.now(tz=datetime.UTC)
+    now = dt.datetime.now(tz=dt.UTC)
     today = now.date()
     this_year = today.year
     next_year = today.year + 1
 
     if is_leap_day(bd) and not calendar.isleap(this_year):
-        birthday_this_year = datetime.date(this_year, 3, 1)
+        birthday_this_year = dt.date(this_year, 3, 1)
     else:
         birthday_this_year = bd.replace(year=this_year)
 
@@ -94,12 +94,12 @@ def get_next_birthday(bd: datetime.date) -> datetime.date:
         return birthday_this_year
     else:
         if is_leap_day(bd) and not calendar.isleap(next_year):
-            return datetime.date(next_year, 3, 1)
+            return dt.date(next_year, 3, 1)
         else:
             return birthday_this_year.replace(year=next_year)
 
 
-def is_leap_day(d: datetime.date) -> bool:
+def is_leap_day(d: dt.date) -> bool:
     return d.month == 2 and d.day == 29
 
 
@@ -153,11 +153,11 @@ def atom() -> werkzeug.Response:
 
     c = {}
 
-    today = datetime.datetime.now(tz=datetime.UTC).date()
+    today = dt.datetime.now(tz=dt.UTC).date()
     c["today_atom"] = f"{today.isoformat()}T00:00:00Z"
 
     c["birthdays"] = []
-    notification_interval = datetime.timedelta(days=notification_days)
+    notification_interval = dt.timedelta(days=notification_days)
     data_location = flask.request.args.get("d")
     app.logger.info(f"{flask.g.request_id} - building atom: {data_location}")
     c["escaped_location"] = html.escape(data_location)
@@ -170,7 +170,7 @@ def atom() -> werkzeug.Response:
         year, month, day = parse_row(row)
 
         if date_is_valid(year, month, day):
-            birthday = datetime.date(year, month, day)
+            birthday = dt.date(year, month, day)
         else:
             continue
 
@@ -216,7 +216,7 @@ def ics() -> werkzeug.Response:
             if not line.startswith(b"END:"):
                 yield line
 
-        dtstamp = datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC)
+        dtstamp = dt.datetime(2024, 1, 1, tzinfo=dt.UTC)
 
         response = requests.get(csv_url, stream=True, timeout=10)
         for row in csv.reader(decoded_response(response)):
@@ -227,7 +227,7 @@ def ics() -> werkzeug.Response:
             year, month, day = parse_row(row)
 
             if date_is_valid(year, month, day):
-                birthday = datetime.date(year, month, day)
+                birthday = dt.date(year, month, day)
             else:
                 continue
 
@@ -238,7 +238,7 @@ def ics() -> werkzeug.Response:
             for next_birthday in birthdays:
                 t = lang_class(name, birthday, next_birthday)
                 event = icalendar.Event()
-                day_after = next_birthday + datetime.timedelta(days=1)
+                day_after = next_birthday + dt.timedelta(days=1)
                 uid_name = name.replace(" ", "")
                 uid = f"{uid_name}{next_birthday.year}"
                 event.add("summary", t.summary)
