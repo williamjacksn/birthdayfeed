@@ -1,4 +1,4 @@
-name: Ruff
+name: Hygiene
 
 on:
   pull_request:
@@ -28,3 +28,11 @@ jobs:
         uses: actions/checkout@v7
       - name: Run ruff format
         run: sh ci/ruff-format.sh
+  ty-check:
+    name: Run ty check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Run ty check
+        run: sh ci/ty-check.sh

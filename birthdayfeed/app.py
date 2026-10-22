@@ -143,7 +143,8 @@ def index() -> str:
 
 @app.route("/birthdayfeed.atom")
 def atom() -> werkzeug.Response:
-    if "d" not in flask.request.args:
+    data_location = flask.request.args.get("d")
+    if data_location is None:
         return flask.redirect(flask.url_for("index"), 303)
 
     flask.g.index = flask.url_for("index", _external=True, _scheme=__scheme__)
@@ -158,7 +159,6 @@ def atom() -> werkzeug.Response:
 
     c["birthdays"] = []
     notification_interval = dt.timedelta(days=notification_days)
-    data_location = flask.request.args.get("d")
     app.logger.info(f"{flask.g.request_id} - building atom: {data_location}")
     c["escaped_location"] = html.escape(data_location)
     response = requests.get(data_location, stream=True, timeout=10)
@@ -193,7 +193,8 @@ def atom() -> werkzeug.Response:
 
 @app.route("/birthdayfeed.ics")
 def ics() -> werkzeug.Response:
-    if "icsd" not in flask.request.args and "d" not in flask.request.args:
+    data_location = flask.request.args.get("icsd", flask.request.args.get("d"))
+    if data_location is None:
         return flask.redirect(flask.url_for("index"), 303)
 
     def generate(
@@ -256,7 +257,6 @@ def ics() -> werkzeug.Response:
             if line.startswith(b"END:"):
                 yield line
 
-    data_location = flask.request.args.get("icsd", flask.request.args.get("d"))
     app.logger.info(f"{flask.g.request_id} -- building ics: {data_location}")
     _lang_class = get_lang_class(flask.request.args.get("l", "en-bd"))
     _cal_type = flask.request.values.get("t", "full")
